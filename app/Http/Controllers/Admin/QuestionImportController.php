@@ -56,12 +56,12 @@ class QuestionImportController extends Controller
         $questionTypes = QuestionType::pluck('id', 'code');
         $difficultyLevels = DifficultyLevel::pluck('id', 'code');
 
-        try {
+        // try {
             $import = new QuestionsImport($questionTypes, $difficultyLevels, $skill->id);
             $import->import($file);
-        } catch (\Exception $exception) {
-            return redirect()->back()->with('errorMessage', 'Oops! Upload Failed. Please check all rows are entered accurately.');
-        }
+        // } catch (\Exception $exception) {
+        //     return redirect()->back()->with('errorMessage', 'Oops! Upload Failed. Please check all rows are entered accurately.');
+        // }
 
         return redirect()->route('questions.index')
             ->with('successMessage', $import->getRowCount().' Questions were imported successfully.');
