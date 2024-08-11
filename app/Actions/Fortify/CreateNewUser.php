@@ -39,7 +39,7 @@ class CreateNewUser implements CreatesNewUsers
 
         // By default assign guest role to new user
         if($user) {
-            $user->assignRole('Guest');
+            $user->assignRole('Student');
         }
 
         return $user;
