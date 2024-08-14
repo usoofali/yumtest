@@ -62,7 +62,8 @@ class QuestionImportController extends Controller
             $import->import($file);
         } catch (\Exception $exception) {
             $msg = $exception->getMessage();
-            return redirect()->back()->with('errorMessage', 'Oops! Upload Failed. Please check all rows are entered accurately.');
+            // 'Oops! Upload Failed. Please check all rows are entered accurately.'
+            return redirect()->back()->with('errorMessage', $msg);
         }
 
         return redirect()->route('questions.index')
