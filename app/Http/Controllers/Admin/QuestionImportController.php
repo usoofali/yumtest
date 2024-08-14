@@ -61,8 +61,8 @@ class QuestionImportController extends Controller
             $import = new QuestionsImport($questionTypes, $difficultyLevels, $skill->id);
             $import->import($file);
         } catch (\Exception $exception) {
-            Log::error('Error processing row: '.json_encode($file).' - '.$exception->getMessage());
-            return redirect()->back()->with('errorMessage', 'Oops! Upload Failed. Please check all rows are entered accurately.');
+            // Log::error('Error processing row: '.json_encode($file).' - '.$exception->getMessage());
+            return redirect()->back()->with('errorMessage', 'Oops! Upload Failed. Please check all rows are entered accurately.'.' - '.$exception->getMessage());
         }
 
         return redirect()->route('questions.index')
