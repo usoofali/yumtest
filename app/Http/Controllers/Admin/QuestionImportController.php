@@ -61,9 +61,7 @@ class QuestionImportController extends Controller
             $import = new QuestionsImport($questionTypes, $difficultyLevels, $skill->id);
             $import->import($file);
         } catch (\Exception $exception) {
-            $msg = $exception->getMessage();
-            // 'Oops! Upload Failed. Please check all rows are entered accurately.'
-            return redirect()->back()->with('errorMessage', $msg);
+            return redirect()->back()->with('errorMessage', 'Oops! Upload Failed. Please check all rows are entered accurately.');
         }
 
         return redirect()->route('questions.index')
