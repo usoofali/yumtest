@@ -8,6 +8,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ImportQuestionsRequest;
 use App\Imports\QuestionsImport;
@@ -60,6 +61,7 @@ class QuestionImportController extends Controller
             $import = new QuestionsImport($questionTypes, $difficultyLevels, $skill->id);
             $import->import($file);
         } catch (\Exception $exception) {
+            Log::error('Error processing row: '.json_encode($file).' - '.$exception->getMessage());
             return redirect()->back()->with('errorMessage', 'Oops! Upload Failed. Please check all rows are entered accurately.');
         }
 

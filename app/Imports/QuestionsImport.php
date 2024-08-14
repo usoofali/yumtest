@@ -10,6 +10,7 @@ namespace App\Imports;
 
 use App\Models\Question;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
@@ -40,14 +41,15 @@ class QuestionsImport implements ToModel, WithHeadingRow, WithBatchInserts, With
      * @return Question
      */
     public function model(array $row)
-    {
+{
+    try {
         ++$this->rows;
         $this->qType = $row['question_type'];
-
+        
         return new Question([
             'question' => $row['question'],
             'code' => 'que_'.Str::random(11),
-            'question_type_id' => $this->questionTypes[$row['question_type']],
+            'question_type_id' => $this->questionTypes[$row['question_type']] ?? null, // Handle missing mappings
             'skill_id' => $this->skill,
             'options' => formatImportOptionsProperty([
                     $row['option1'],
@@ -59,11 +61,16 @@ class QuestionsImport implements ToModel, WithHeadingRow, WithBatchInserts, With
             'correct_answer' => formatImportAnswerProperty($row['correct_answer'], $row['question_type'], $row['question']),
             'default_marks' => $row['default_marks'],
             'default_time' => $row['default_time_to_solve'],
-            'difficulty_level_id' => $this->difficultyLevels[$row['difficulty_level']],
+            'difficulty_level_id' => $this->difficultyLevels[$row['difficulty_level']] ?? null, // Handle missing mappings
             'hint' => $row['hint'],
             'solution' => $row['solution'],
         ]);
+    } catch (\Exception $e) {
+        Log::error('Error processing row: '.json_encode($row).' - '.$e->getMessage());
+        throw $e; // Re-throw to be caught in the controller
     }
+}
+
 
     public function rules(): array
     {
