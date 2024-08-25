@@ -152,7 +152,6 @@ class CheckoutController extends Controller
             if(!$payment) {
                 return redirect()->back()->with('successMessage', 'Something went wrong. Please try again.');
             }
-
         } catch (\Exception $e) {
             Log::channel('daily')->error($e->getMessage());
             return redirect()->route('payment_failed');
@@ -183,9 +182,9 @@ class CheckoutController extends Controller
             'razorpay_order_id' => 'required',
         ]);
 
-        // if ($validator->fails()) {
-        //     return redirect()->route('payment_failed');
-        // }
+        if ($validator->fails()) {
+            return redirect()->route('payment_failed');
+        }
 
         try {
             $verified = $repository->verifyPayment([
@@ -193,8 +192,6 @@ class CheckoutController extends Controller
                 'razorpay_payment_id' => $request->get('razorpay_payment_id'),
                 'razorpay_order_id' => $request->get('razorpay_order_id')
             ]);
-
-            $verified = true;
             if($verified) {
                 $payment = Payment::with(['plan', 'subscription'])->where('reference_id', '=', $request->get('razorpay_order_id'))->first();
 
@@ -232,7 +229,7 @@ class CheckoutController extends Controller
         } catch (\Exception $e) {
             Log::channel('daily')->error($e->getMessage());
             return redirect()->route('payment_failed');
-        // }
+        }
     }
 
     /**
