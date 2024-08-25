@@ -3,10 +3,8 @@
 @section('title', __('Review & Checkout'))
 
 @section('content')
-    <main class="bg-gray-50">
-        
-    </main>
 @endsection
+
 @push('scripts')
     {{--This api can't be hosted on localhost--}}
     <script type="text/javascript" src="https://sdk.monnify.com/plugin/monnify.js"></script>
@@ -28,8 +26,12 @@
                 onLoadComplete: () => {
                     console.log("SDK is UP");
                 },
-                onComplete: "{{ route('razorpay_callback') }}",
-                onClose: "{{ route('payment_cancelled') }}"
+                onComplete: () => {
+                    console.log("loading has Completed");
+                },
+                onClose: () => {
+                    console.log("loading has closed");
+                }
             });
         
     </script>
