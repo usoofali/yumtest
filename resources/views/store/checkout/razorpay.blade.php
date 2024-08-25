@@ -9,6 +9,7 @@
     {{--This api can't be hosted on localhost--}}
     <script type="text/javascript" src="https://sdk.monnify.com/plugin/monnify.js"></script>
     <script>
+        console.log( "{{ $billing_information['full_name'] }}");
         MonnifySDK.initialize({
                 amount: "{{ $order_total }}",
                 currency: "{{ $order_currency }}",
