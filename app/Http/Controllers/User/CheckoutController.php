@@ -135,9 +135,7 @@ class CheckoutController extends Controller
 
         // Create payment record and razorpay order
         try {
-        Log::channel('daily')->error("May be this the error that troubling me 1..");
             $order = $repository->createOrder($paymentId, $orderSummary['total'] * 100);
-            Log::channel('daily')->error("May be this the error that troubling me 2..");
             $payment = $this->paymentRepository->createPayment([
                 'payment_id' => $paymentId,
                 'currency' => $this->paymentSettings->default_currency,
@@ -150,17 +148,15 @@ class CheckoutController extends Controller
                 'status' => 'pending',
                 'order_summary' => $orderSummary
             ]);
-            Log::channel('daily')->error("May be this the error that troubling me 3..");
             if(!$payment) {
                 return redirect()->back()->with('successMessage', 'Something went wrong. Please try again.');
             }
         } catch (\Exception $e) {
-            Log::channel('daily')->error("May be this the error that troubling me 4..");
             Log::channel('daily')->error($e->getMessage());
             return redirect()->route('payment_failed');
         }
+
         return view('store.checkout.razorpay', [
-            'order_id' => $order['id'],
             'order_currency' => $order['currency'],
             'order_total' => $order['amount'],
             'razorpay_key' => app(RazorpaySettings::class)->key_id,
