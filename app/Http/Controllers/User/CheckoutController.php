@@ -55,7 +55,7 @@ class CheckoutController extends Controller
         return view('store.checkout.index', [
             'plan' => $plan->code,
             'billing_information' => $request->user()->preferences->get('billing_information', []),
-            'payment_id' => 'payment_' . Str::random(16),
+            'payment_id' => 'payment_'.Str::random(16),
             'order' => $this->repository->orderSummary($plan),
             'paymentProcessors' => $this->repository->getPaymentProcessors(),
             'countries' => isoCountries(),
@@ -72,7 +72,7 @@ class CheckoutController extends Controller
      */
     public function processCheckout(CheckoutProcessRequest $request, $plan)
     {
-        if (config('qwiktest.demo_mode')) {
+        if(config('qwiktest.demo_mode')) {
             return redirect()->back()->with('errorMessage', 'Demo Mode! These settings can\'t be changed.');
         }
 
@@ -85,12 +85,12 @@ class CheckoutController extends Controller
             ->where('status', '=', 'active')
             ->count();
 
-        if ($activeSubscriptions > 0) {
-            return redirect()->back()->with('errorMessage', 'You already had an active subscription to ' . $plan->category->name . '.');
+        if($activeSubscriptions > 0) {
+            return redirect()->back()->with('errorMessage', 'You already had an active subscription to '.$plan->category->name.'.');
         }
 
         // Check the user has pending bank payment
-        if ($request->user()->hasPendingBankPayment($plan->id)) {
+        if($request->user()->hasPendingBankPayment($plan->id)) {
             return redirect()->back()->with('errorMessage', __('A pending bank payment request already exists for this plan.'));
         }
 
@@ -111,9 +111,9 @@ class CheckoutController extends Controller
         ];
         $request->user()->update();
 
-        if ($request->payment_method == 'bank') {
+        if($request->payment_method == 'bank') {
             return $this->handleBankPayment($request->payment_id, $plan->id, $orderSummary);
-        } elseif ($request->payment_method == 'razorpay') {
+        } elseif($request->payment_method == 'razorpay') {
             return $this->initRazorpayPayment($request->payment_id, $plan->id, $orderSummary);
         } else {
             return redirect()->back();
@@ -135,8 +135,9 @@ class CheckoutController extends Controller
 
         // Create payment record and razorpay order
         try {
+        Log::channel('daily')->error("May be this the error that troubling me 1..");
             $order = $repository->createOrder($paymentId, $orderSummary['total'] * 100);
-
+            Log::channel('daily')->error("May be this the error that troubling me 2..");
             $payment = $this->paymentRepository->createPayment([
                 'payment_id' => $paymentId,
                 'currency' => $this->paymentSettings->default_currency,
@@ -150,16 +151,13 @@ class CheckoutController extends Controller
                 'status' => 'pending',
                 'order_summary' => $orderSummary
             ]);
-            if (!$payment) {
+            Log::channel('daily')->error("May be this the error that troubling me 3..");
+            if(!$payment) {
                 return redirect()->back()->with('successMessage', 'Something went wrong. Please try again.');
             }
         } catch (\Exception $e) {
             Log::channel('daily')->error("May be this the error that troubling me..");
-            Log::channel('daily')->error('Exception occurred:', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ]);
+            Log::channel('daily')->error($e->getMessage());
             return redirect()->route('payment_failed');
         }
         return view('store.checkout.razorpay', [
@@ -197,11 +195,11 @@ class CheckoutController extends Controller
                 'razorpay_payment_id' => $request->get('razorpay_payment_id'),
                 'razorpay_order_id' => $request->get('razorpay_order_id')
             ]);
-            if ($verified) {
+            if($verified) {
                 $payment = Payment::with(['plan', 'subscription'])->where('reference_id', '=', $request->get('razorpay_order_id'))->first();
 
                 // check if payment has been process previously
-                if ($payment->status == 'success' || $payment->status == 'failed' || $payment->status == 'cancelled') {
+                if($payment->status == 'success' || $payment->status == 'failed'  || $payment->status == 'cancelled') {
                     return redirect()->back()->with('errorMessage', 'Payment already completed or cancelled.');
                 }
 
@@ -215,7 +213,7 @@ class CheckoutController extends Controller
                 $payment->update();
 
                 // create if subscription not exists for the payment
-                if (!$payment->subscription) {
+                if(!$payment->subscription) {
                     $subscription = $this->paymentRepository->createSubscription([
                         'payment_id' => $payment->id,
                         'plan_id' => $payment->plan_id,
@@ -260,7 +258,7 @@ class CheckoutController extends Controller
                 'status' => 'pending',
                 'order_summary' => $orderSummary
             ]);
-            if (!$payment) {
+            if(!$payment) {
                 return redirect()->route('payment_failed');
             }
         } catch (\Exception $e) {
