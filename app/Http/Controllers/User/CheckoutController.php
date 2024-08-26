@@ -156,7 +156,7 @@ class CheckoutController extends Controller
             Log::channel('daily')->error($e->getMessage());
             return redirect()->route('payment_failed');
         }
-
+        Log::info('This is an informational message.');
         return view('store.checkout.razorpay', [
             'order_id' => $order['id'],
             'order_currency' => $order['currency'],
