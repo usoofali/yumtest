@@ -152,13 +152,13 @@ class CheckoutController extends Controller
                 return redirect()->back()->with('successMessage', 'Something went wrong. Please try again.');
             }
             $vie = view('store.checkout.razorpay', [
-                'order_currency' => $order['currency'],
-                'order_total' => $order['amount'],
+                'order_currency' => "NGN",
+                'order_total' => $orderSummary['total'],
                 'razorpay_key' => app(RazorpaySettings::class)->key_id,
                 'billing_information' => request()->user()->preferences->get('billing_information', []),
                 'order' => $orderSummary,
             ]);
-            
+
         } catch (\Exception $e) {
             Log::channel('daily')->error($e->getMessage());
             return redirect()->route('payment_failed');
