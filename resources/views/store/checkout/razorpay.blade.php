@@ -37,7 +37,7 @@
 
 @push('scripts')
     {{--This api can't be hosted on localhost--}}
-    <script type="text/javascript" src="https://sdk.monnify.com/plugin/monnify.js"></script>
+    <!-- <script type="text/javascript" src="https://sdk.monnify.com/plugin/monnify.js"></script> -->
     <script>
         console.log("{{ $billing_information['full_name'] }}");
         document.getElementById('rzp-button').addEventListener('click', function (event) {
