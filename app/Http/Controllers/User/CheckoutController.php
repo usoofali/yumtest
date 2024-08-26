@@ -145,7 +145,6 @@ class CheckoutController extends Controller
                 'user_id' => request()->user()->id,
                 'payment_date' => Carbon::now()->toDateTimeString(),
                 'payment_processor' => 'razorpay',
-                // 'reference_id' => $order['id'],
                 'total_amount' => $orderSummary['total'],
                 'billing_information' => request()->user()->preferences->billing_information,
                 'status' => 'pending',
