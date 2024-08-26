@@ -21,7 +21,7 @@
                         @include('store.checkout.partials._order_summary')
                         <div class="mt-4">
                             <div class="flex flex-col mt-6">
-                                <button id="rzp-button" type="submit" onclick="payWithMonnify()"
+                                <button id="rzp-button" type="submit"
                                     class="mt-4 w-full bg-primary border border-transparent rounded-sm shadow-sm py-2 px-4 text-base font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-current">
                                     {{ __('Pay Now') }}
                                 </button>
