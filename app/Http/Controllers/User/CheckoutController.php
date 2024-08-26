@@ -156,7 +156,7 @@ class CheckoutController extends Controller
                 return redirect()->back()->with('successMessage', 'Something went wrong. Please try again.');
             }
         } catch (\Exception $e) {
-            Log::channel('daily')->error("May be this the error that troubling me..");
+            Log::channel('daily')->error("May be this the error that troubling me 4..");
             Log::channel('daily')->error($e->getMessage());
             return redirect()->route('payment_failed');
         }
