@@ -142,7 +142,7 @@ class CheckoutController extends Controller
                 'payment_id' => $paymentId,
                 'currency' => $this->paymentSettings->default_currency,
                 'plan_id' => $planId,
-                'user_id' => request()->user()->id,
+                // 'user_id' => request()->user()->id,
                 'payment_date' => Carbon::now()->toDateTimeString(),
                 'payment_processor' => 'razorpay',
                 'reference_id' => $order['id'],
