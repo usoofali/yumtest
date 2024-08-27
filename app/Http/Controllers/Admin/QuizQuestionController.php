@@ -77,12 +77,9 @@ class QuizQuestionController extends Controller
      */
     public function fetchAvailableQuestions($id, QuestionFilters $filters)
     {
-        Log::error('This is an error message from quiz');
-        Log::error($id);
         $quiz = Quiz::select(['id', 'title'])->with(['questions' => function ($builder) {
             $builder->select('id');
         }])->findOrFail($id);
-        Log::error($quiz);
 
         $questions = Question::filter($filters)->whereNotIn('id', $quiz->questions->pluck('id'))
             ->with(['questionType:id,name,code', 'difficultyLevel:id,name,code', 'skill:id,name'])

@@ -135,7 +135,7 @@
                         <div class="p-4 lg:p-6">
                             @include('store.checkout.partials._order_summary')
                             <div class="mt-4">
-                                <template x-if="payment == 'bank'">
+                                <!-- <template x-if="payment == 'bank'">
                                     <div class="flex flex-col">
                                         @include('components.bank_details')
                                         <div class="mt-4">{{ __('When transferring the bank payment, please must include the following Payment ID in the reference field of the payment.') }}</div>
@@ -146,7 +146,7 @@
                                             {{ __('Submit Bank Payment') }}
                                         </button>
                                     </div>
-                                </template>
+                                </template> -->
                                 <template x-if="payment != 'bank'">
                                     <div class="flex flex-col mt-6">
                                         <div class="text-sm font-italic">{{ __('Note: You can review your order on the next page before making the payment.') }}</div>
