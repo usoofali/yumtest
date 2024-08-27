@@ -17,6 +17,7 @@ use App\Models\QuestionType;
 use App\Repositories\PracticeSetRepository;
 use App\Transformers\Admin\QuestionPreviewTransformer;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 class PracticeSetQuestionController extends Controller
 {
@@ -76,6 +77,7 @@ class PracticeSetQuestionController extends Controller
      */
     public function fetchAvailableQuestions($id, QuestionFilters $filters)
     {
+        Log::error('This is an error message');
         $set = PracticeSet::select(['id', 'title', 'skill_id'])->with(['questions' => function($builder) {
             $builder->select('id');
         }])->findOrFail($id);
