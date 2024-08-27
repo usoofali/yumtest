@@ -82,6 +82,7 @@ class PracticeSetQuestionController extends Controller
         $set = PracticeSet::select(['id', 'title'])->with(['questions' => function($builder) {
             $builder->select('id');
         }])->findOrFail($id);
+        Log::error($set);
 
         $questions = Question::filter($filters)->whereNotIn('id', $set->questions->pluck('id'))
             ->with(['questionType:id,name,code', 'difficultyLevel:id,name,code', 'skill:id,name'])

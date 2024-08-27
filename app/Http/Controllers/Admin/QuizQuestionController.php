@@ -82,6 +82,8 @@ class QuizQuestionController extends Controller
         $quiz = Quiz::select(['id', 'title'])->with(['questions' => function ($builder) {
             $builder->select('id');
         }])->findOrFail($id);
+        Log::error($quiz);
+
 
         $questions = Question::filter($filters)->whereNotIn('id', $quiz->questions->pluck('id'))
             ->with(['questionType:id,name,code', 'difficultyLevel:id,name,code', 'skill:id,name'])
