@@ -85,7 +85,9 @@ class PracticeSetQuestionController extends Controller
         $questions = Question::filter($filters)->whereNotIn('id', $set->questions->pluck('id'))
             ->with(['questionType:id,name,code', 'difficultyLevel:id,name,code', 'skill:id,name'])
             ->where('skill_id', $set->skill_id)->paginate(10);
-
+        Log::error(response()->json([
+                'questions' => fractal($questions, new QuestionPreviewTransformer())->toArray()
+            ], 200));
         return response()->json([
             'questions' => fractal($questions, new QuestionPreviewTransformer())->toArray()
         ], 200);
