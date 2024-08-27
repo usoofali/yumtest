@@ -78,7 +78,7 @@ class PracticeSetQuestionController extends Controller
     public function fetchAvailableQuestions($id, QuestionFilters $filters)
     {
         Log::error('This is an error message');
-        $set = PracticeSet::select(['id', 'title', 'skill_id'])->with(['questions' => function($builder) {
+        $set = PracticeSet::select(['id', 'title'])->with(['questions' => function($builder) {
             $builder->select('id');
         }])->findOrFail($id);
 
