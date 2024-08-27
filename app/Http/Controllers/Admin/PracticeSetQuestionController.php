@@ -77,7 +77,8 @@ class PracticeSetQuestionController extends Controller
      */
     public function fetchAvailableQuestions($id, QuestionFilters $filters)
     {
-        Log::error('This is an error message');
+        Log::error('This is an error message from practice');
+        Log::error($id);
         $set = PracticeSet::select(['id', 'title'])->with(['questions' => function($builder) {
             $builder->select('id');
         }])->findOrFail($id);
@@ -85,9 +86,10 @@ class PracticeSetQuestionController extends Controller
         $questions = Question::filter($filters)->whereNotIn('id', $set->questions->pluck('id'))
             ->with(['questionType:id,name,code', 'difficultyLevel:id,name,code', 'skill:id,name'])
             ->where('skill_id', $set->skill_id)->paginate(10);
-        Log::error(response()->json([
-                'questions' => fractal($questions, new QuestionPreviewTransformer())->toArray()
-            ], 200));
+
+        // Log::error(response()->json([
+        //         'questions' => fractal($questions, new QuestionPreviewTransformer())->toArray()
+        //     ], 200));
         return response()->json([
             'questions' => fractal($questions, new QuestionPreviewTransformer())->toArray()
         ], 200);
