@@ -175,6 +175,7 @@ class CheckoutController extends Controller
      */
     public function handleRazorpayPayment(Request $request, RazorpayRepository $repository)
     {
+        Log::info('Payment success request received:', $request->all());
         $validator = Validator::make($request->all(), [
             'razorpay_signature' => 'required',
             'razorpay_payment_id' => 'required',
@@ -295,7 +296,7 @@ class CheckoutController extends Controller
         }
     
         // Return the cancellation view to the user
-        return view('store.checkout.payment_cancelled')->with('message', 'Your payment has been cancelled.');
+        return view('store.checkout.payment_cancelled');
     }
     
 
