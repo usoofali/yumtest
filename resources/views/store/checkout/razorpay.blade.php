@@ -46,7 +46,7 @@
             MonnifySDK.initialize({
                 amount: "{{ $order_total }}",
                 currency: "{{ $order_currency }}",
-                reference: 'YM' + Math.floor((Math.random() * 1000000000) + 1),
+                reference: 'YMT_' + Math.floor((Math.random() * 1000000000) + 1),
                 customerFullName: "{{ $billing_information['full_name'] }}",
                 customerEmail: "{{ $billing_information['email'] }}",
                 customerPhone: "{{ $billing_information['phone'] }}",
