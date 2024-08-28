@@ -61,7 +61,7 @@
                     console.log("SDK is UP");
                 },
                 onComplete: () => {
-                    console.log("loading has Completed");
+                    window.location.href = "{{ route('razorpay_callback') }}";
                 },
                 onClose: () => {
                     // Redirecting to the cancellation route with the payment ID
