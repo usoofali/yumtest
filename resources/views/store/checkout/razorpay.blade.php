@@ -63,7 +63,10 @@
                 onComplete: () => {
                     console.log("loading has Completed");
                 },
-                onClose: "{{ route('payment_cancelled', ['payment_id' => $payment_id]) }}"
+                onClose: () => {
+                    // Redirecting to the cancellation route with the payment ID
+                    window.location.href = "{{ route('payment_cancelled') }}?payment_id=" + paymentId;
+                }
             });
         });
 
