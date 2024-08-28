@@ -61,6 +61,7 @@
                     console.log("SDK is UP");
                 },
                 onComplete: () => {
+                    console.log("SDK has completed.");
                     window.location.href = "{{ route('razorpay_callback') }}";
                 },
                 onClose: () => {
