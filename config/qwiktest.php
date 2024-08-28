@@ -37,7 +37,7 @@ return [
    */
 
     'payment_processors' => [
-        'monnify' => [
+        'razorpay' => [
             'name' => 'Monnify',
             'description' => 'Cards, Transfer, USSD',
         ],
