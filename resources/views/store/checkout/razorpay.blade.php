@@ -76,7 +76,6 @@
 
                 },
                 onClose: (response) => {
-                    console.log(response);
                     if (response.paymentStatus === "USER_CANCELLED") {
                         // Redirect to the payment cancelled route with payment_id parameter
                         window.location.href = `{{ route('payment_cancelled') }}?payment_id={{ $payment_id }}`;
