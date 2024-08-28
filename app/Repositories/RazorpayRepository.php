@@ -38,13 +38,27 @@ class RazorpayRepository
     public function createOrder($paymentId, $amount)
     {
         return Http::withBasicAuth($this->settings->key_id, $this->settings->key_secret)
-            ->withHeaders(['Content-Type' => 'application/json']
+            ->withHeaders(
+                ['Content-Type' => 'application/json']
             )->post('https://api.razorpay.com/v1/orders', [
-                'receipt' => $paymentId,
-                'amount' => $amount,
-                'payment_capture' => 1,
-                'currency' => app(PaymentSettings::class)->default_currency
-            ]);
+                    'receipt' => $paymentId,
+                    'amount' => $amount,
+                    'payment_capture' => 1,
+                    'currency' => app(PaymentSettings::class)->default_currency
+                ]);
+    }
+
+    public function verifyTransaction($paymentReference)
+    {
+        // Define the API endpoint with the query parameter for the payment reference
+        $url = 'https://sandbox.monnify.com/api/v2/merchant/transactions/query?paymentReference=' . urlencode($paymentReference);
+
+        // Make a GET request to the Monnify API with Basic Authentication
+        $response = Http::withBasicAuth($this->settings->key_id, $this->settings->key_secret)
+            ->get($url);
+
+        // Return the response (or you can handle it as needed)
+        return $response;
     }
 
     /**

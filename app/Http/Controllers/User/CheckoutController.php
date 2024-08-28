@@ -175,8 +175,8 @@ class CheckoutController extends Controller
      */
     public function handleRazorpayPayment(Request $request, RazorpayRepository $repository)
     {
-        Log::info('Payment success request received:', $request->all());
-        Log::channel('daily')->info("Payment with ID {$request->all()} has been cancelled and deleted.");
+        try{
+        Log::channel('daily')->info('Payment success request received:', $request->all());
         $validator = Validator::make($request->all(), [
             'razorpay_signature' => 'required',
             'razorpay_payment_id' => 'required',
@@ -186,13 +186,19 @@ class CheckoutController extends Controller
         if ($validator->fails()) {
             return redirect()->route('payment_failed');
         }
+        } catch (\Exception $e) {
+            Log::channel('daily')->error($e->getMessage());
+            return redirect()->route('payment_failed');
+        }
 
         try {
+
             $verified = $repository->verifyPayment([
                 'razorpay_signature' => $request->get('razorpay_signature'),
                 'razorpay_payment_id' => $request->get('razorpay_payment_id'),
                 'razorpay_order_id' => $request->get('razorpay_order_id')
             ]);
+            
             if($verified) {
                 $payment = Payment::with(['plan', 'subscription'])->where('reference_id', '=', $request->get('razorpay_order_id'))->first();
 
