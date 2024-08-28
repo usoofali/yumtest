@@ -61,15 +61,32 @@
                     console.log("SDK is UP");
                 },
                 onComplete: (response) => {
-                    
-                    console.log(response);
-                    
+
+                    if (response.status === "SUCCESS") {
+                        // Redirect to the Razorpay callback route
+                        window.location.href = "{{ route('razorpay_callback') }}";
+                        
+                    } else if (response.status === "FAILED") {
+                        // Redirect to the payment cancelled route with payment_id parameter
+                        window.location.href = `{{ route('payment_failed') }}?payment_id={{ $payment_id }}`;
+                    } else {
+                        // Optionally handle other statuses or unexpected cases
+                        console.error('Unexpected status:', response.status);
+                    }
+
                 },
-                onClose: () => {
-                    // Redirecting to the cancellation route with the payment ID
-                    console.log("SDK modal closed.");
-                    // window.location.href = "{{ route('payment_cancelled') }}?payment_id={{ $payment_id }}";
-                    // window.location.href = "{{ route('razorpay_callback') }}";
+                onClose: (response) => {
+                    console.log(response);
+                    // if (response.status === "SUCCESS") {
+                    //     // Redirect to the Razorpay callback route
+                    //     window.location.href = "{{ route('razorpay_callback') }}";
+                    // } else if (response.status === "FAILED") {
+                    //     // Redirect to the payment cancelled route with payment_id parameter
+                    //     window.location.href = `{{ route('payment_cancelled') }}?payment_id={{ $payment_id }}`;
+                    // } else {
+                    //     // Optionally handle other statuses or unexpected cases
+                    //     console.error('Unexpected status:', response.status);
+                    // }
                 }
             });
         });

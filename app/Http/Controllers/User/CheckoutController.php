@@ -301,8 +301,25 @@ class CheckoutController extends Controller
     }
     
 
-    public function paymentFailed()
+    public function paymentFailed(Request $request)
     {
+        // Retrieve the payment ID from the query parameters
+        $paymentId = $request->query('payment_id');
+    
+        if ($paymentId) {
+            // Find the payment record by payment ID
+            $payment = Payment::where('payment_id', $paymentId)->first();
+    
+            if ($payment) {
+                // Delete the payment record
+                $payment->delete();
+                Log::channel('daily')->info("Payment with ID {$paymentId} has been cancelled and deleted.");
+            } else {
+                Log::channel('daily')->warning("No payment found for cancellation with ID {$paymentId}.");
+            }
+        } else {
+            Log::channel('daily')->warning("No payment ID provided for cancellation.");
+        }
         return view('store.checkout.payment_failed');
     }
 }
