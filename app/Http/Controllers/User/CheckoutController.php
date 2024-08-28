@@ -193,8 +193,9 @@ class CheckoutController extends Controller
             $response = curl_exec($curl);
             curl_close($curl);
             $res = json_decode($response, true);
+            Log::channel('daily')->info('Payment success verification received:', $res);
             return $res['responseBody'];
-            
+
         } catch (\Exception $e) {
             Log::channel('daily')->info('Payment success verification received.');
         }
@@ -218,16 +219,12 @@ class CheckoutController extends Controller
             if ($validator->fails()) {
                 return redirect()->route('payment_failed', );
             }
-        } catch (\Exception $e) {
-            Log::channel('daily')->error($e->getMessage());
-            return redirect()->route('payment_failed');
-        }
-
-        try {
+       
 
             $verified = $this->verifyTransaction($request->get('paymentReference'));
 
             if ($verified) {
+
                 $payment = Payment::with(['plan', 'subscription'])->where('reference_id', '=', $request->get('razorpay_order_id'))->first();
 
                 // check if payment has been process previously
