@@ -223,14 +223,9 @@ class CheckoutController extends Controller
         $payment->payment_date = Carbon::now()->toDateTimeString();
         if($request->get('paymentStatus') === "PAID"){
             $payment->status = 'success';
-        }else if($request->get('paymentStatus') === "PAID"){
-            $payment->status = 'success';
-        }else if($request->get('paymentStatus') === "PAID"){
-            $payment->status = 'success';
-        }else if($request->get('paymentStatus') === "PAID"){
-            $payment->status = 'success';
+        }else {
+            $payment->status = 'pending';
         }
-        
         $payment->update();
 
         // create if subscription not exists for the payment
@@ -262,6 +257,13 @@ class CheckoutController extends Controller
                 'paymentReference' => 'required',
                 'status' => 'required',
             ]);
+            $payment_id = substr($request->get('paymentReference'), 0, 24);
+            $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
+    
+            // check if payment has been process previously
+            if ($payment->status == 'success' || $payment->status == 'failed' || $payment->status == 'cancelled') {
+                return redirect()->back()->with('errorMessage', 'Payment already completed or cancelled.');
+            }
 
             if ($validator->fails()) {
                 return redirect()->route('payment_failed', );
