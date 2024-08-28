@@ -62,7 +62,7 @@
                 },
                 onComplete: () => {
                     console.log("SDK has completed.");
-                    window.location.href = "{{ route('razorpay_callback') }}";
+                    // window.location.href = "{{ route('razorpay_callback') }}";
                 },
                 onClose: () => {
                     // Redirecting to the cancellation route with the payment ID
