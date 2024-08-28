@@ -52,7 +52,7 @@
                 customerPhone: "{{ $billing_information['phone'] }}",
                 apiKey: "{{ $razorpay_key }}",
                 contractCode: "4294676748",
-                paymentDescription: "YUM Test",
+                paymentDescription: "YUMTest Payment",
                 isTestMode: true,
                 onLoadStart: () => {
                     console.log("loading has started");
@@ -60,13 +60,12 @@
                 onLoadComplete: () => {
                     console.log("SDK is UP");
                 },
-                onComplete: () => {
-                    console.log("SDK has completed.");
-                    // window.location.href = "{{ route('razorpay_callback') }}";
+                onComplete: (response) => {
+                    console.log(response);
                 },
                 onClose: () => {
                     // Redirecting to the cancellation route with the payment ID
-                    window.location.href = "{{ route('payment_cancelled') }}?payment_id={{ $payment_id }}";
+                    console.log("SDK model closed.");
                 }
             });
         });
