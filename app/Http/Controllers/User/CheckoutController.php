@@ -33,6 +33,7 @@ class CheckoutController extends Controller
      * @var PaymentSettings
      */
     private PaymentSettings $paymentSettings;
+    protected $accessToken;
 
 
 
@@ -42,6 +43,36 @@ class CheckoutController extends Controller
         $this->repository = $repository;
         $this->paymentRepository = $paymentRepository;
         $this->paymentSettings = $paymentSettings;
+        try {
+            $api_key = app(RazorpaySettings::class)->key_id;
+            $secret_key = app(RazorpaySettings::class)->key_secret;
+            $auth = base64_encode($api_key . ":" . $secret_key);
+
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://sandbox.monnify.com/api/v1/auth/login/',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+
+            ));
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+
+                "Authorization: Basic $auth"
+
+            ));
+            $response = json_decode(curl_exec($curl), true);
+            curl_close($curl);
+            //Assign accessToken to var
+            $this->accessToken = $response['responseBody']['accessToken'];
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+
     }
 
     /**
@@ -187,7 +218,7 @@ class CheckoutController extends Controller
             $api_key = app(RazorpaySettings::class)->key_id;
             $secret_key = app(RazorpaySettings::class)->key_secret;
             curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-                "Authorization: Basic " . base64_encode($api_key . ":" . $secret_key)
+                "Authorization: Bearer " . $this->accessToken
             ));
 
             $response = curl_exec($curl);
@@ -219,7 +250,7 @@ class CheckoutController extends Controller
             if ($validator->fails()) {
                 return redirect()->route('payment_failed', );
             }
-       
+
 
             $verified = $this->verifyTransaction($request->get('paymentReference'));
 
