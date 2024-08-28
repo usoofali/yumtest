@@ -208,7 +208,7 @@ class CheckoutController extends Controller
             Log::channel('daily')->info($this->accessToken);
             $curl = curl_init();
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://sandbox.monnify.com/api/v2/transactions/' . $ref . '',
+                CURLOPT_URL => 'https://sandbox.monnify.com/api/v2/transactions/query' . $ref . '',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
