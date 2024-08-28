@@ -28,10 +28,13 @@ class CheckoutController extends Controller
      * @var PaymentRepository
      */
     private PaymentRepository $paymentRepository;
+    private PaymentRepository $payment;
     /**
      * @var PaymentSettings
      */
     private PaymentSettings $paymentSettings;
+
+    
 
     public function __construct(CheckoutRepository $repository, PaymentRepository $paymentRepository, PaymentSettings $paymentSettings)
     {
@@ -130,12 +133,9 @@ class CheckoutController extends Controller
      */
     public function initRazorpayPayment($paymentId, $planId, $orderSummary)
     {
-        $repository = app(RazorpayRepository::class);
-        $order = null;
-
-        // Create payment record and razorpay order
+    
+        // Create payment record
         try {
-            $order = $repository->createOrder($paymentId, $orderSummary['total'] * 100);
             $payment = $this->paymentRepository->createPayment([
                 'payment_id' => $paymentId,
                 'currency' => $this->paymentSettings->default_currency,
@@ -157,6 +157,7 @@ class CheckoutController extends Controller
                 'razorpay_key' => app(RazorpaySettings::class)->key_id,
                 'billing_information' => request()->user()->preferences->get('billing_information', []),
                 'order' => $orderSummary,
+                'payment_id' => $paymentId,
             ]);
 
         } catch (\Exception $e) {
@@ -274,10 +275,30 @@ class CheckoutController extends Controller
         return view('store.checkout.payment_pending');
     }
 
-    public function paymentCancelled()
+    public function paymentCancelled(Request $request)
     {
-        return view('store.checkout.payment_cancelled');
+        // Retrieve the payment ID from the query parameters
+        $paymentId = $request->query('payment_id');
+    
+        if ($paymentId) {
+            // Find the payment record by payment ID
+            $payment = Payment::where('payment_id', $paymentId)->first();
+    
+            if ($payment) {
+                // Delete the payment record
+                $payment->delete();
+                Log::channel('daily')->info("Payment with ID {$paymentId} has been cancelled and deleted.");
+            } else {
+                Log::channel('daily')->warning("No payment found for cancellation with ID {$paymentId}.");
+            }
+        } else {
+            Log::channel('daily')->warning("No payment ID provided for cancellation.");
+        }
+    
+        // Return the cancellation view to the user
+        return view('store.checkout.payment_cancelled')->with('message', 'Your payment has been cancelled.');
     }
+    
 
     public function paymentFailed()
     {

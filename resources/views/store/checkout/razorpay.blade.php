@@ -63,9 +63,7 @@
                 onComplete: () => {
                     console.log("loading has Completed");
                 },
-                onClose: () => {
-                    console.log("loading has closed");
-                }
+                onClose: "{{ route('payment_cancelled', ['payment_id' => $payment_id]) }}"
             });
         });
 
