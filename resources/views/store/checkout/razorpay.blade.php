@@ -42,11 +42,11 @@
         console.log("{{ $billing_information['full_name'] }}");
         document.getElementById('rzp-button').addEventListener('click', function (event) {
             event.preventDefault();
-
+            var ref = "{{ $payment_id }}" + Math.floor((Math.random() * 1000000000) + 1);
             MonnifySDK.initialize({
                 amount: "{{ $order_total }}",
                 currency: "{{ $order_currency }}",
-                reference: "{{ $payment_id }}-" + Math.floor((Math.random() * 1000000000) + 1),
+                reference: ref,
                 customerFullName: "{{ $billing_information['full_name'] }}",
                 customerEmail: "{{ $billing_information['email'] }}",
                 customerPhone: "{{ $billing_information['phone'] }}",
@@ -63,18 +63,13 @@
                 onComplete: (response) => {
 
                     if (response.status === "SUCCESS") {
-                        // Redirect to the Razorpay callback route
-                        const dataToSend = {
-                            ...response, // Spread the existing response object
-                            payment_id: "{{ $payment_id }}" // Add the payment_id
-                        };
                         fetch("{{ route('razorpay_callback') }}", {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
-                            body: JSON.stringify(dataToSend)
+                            body: JSON.stringify(response)
                         });
 
                     } else if (response.status === "FAILED") {

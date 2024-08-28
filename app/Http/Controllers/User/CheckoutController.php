@@ -170,24 +170,34 @@ class CheckoutController extends Controller
     public function verifyTransaction($paymentReference)
     {
         // Define the API endpoint with the query parameter for the payment reference
-        $headers = [
-            'Authorization' => 'Basic TUtfUFJPRF9XV0RYRktCN1paOkVUOVJMU1dESjNEN1FYRE44UUNSTVlSTlBCM1czRUFL',
-        ];
+        try {
+            $ref = urlencode($paymentReference);
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://sandbox.monnify.com/api/v2/transactions/' . $ref . '',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET'
+            ));
+            //Use bearer when dealing with oauth 2
+            $api_key = app(RazorpaySettings::class)->key_id;
+            $secret_key = app(RazorpaySettings::class)->key_secret;
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                "Authorization: Basic " . base64_encode($api_key . ":" . $secret_key)
+            ));
 
-        // Define the URL and parameters
-        $url = 'https://sandbox.monnify.com/api/v2/merchant/transactions/query';
-        $queryParams = [
-            'paymentReference' => $paymentReference,
-        ];
-
-        // Make the GET request
-        $response = Http::withHeaders($headers)->get($url, $queryParams);
-
-        // Get the response body
-        $responseBody = $response->body();
-        Log::channel('daily')->info('Payment success verification received:', ["rr"=>$responseBody]);
-        return $responseBody;
-
+            $response = curl_exec($curl);
+            curl_close($curl);
+            $res = json_decode($response, true);
+            return $res['responseBody'];
+            
+        } catch (\Exception $e) {
+            Log::channel('daily')->info('Payment success verification received.');
+        }
     }
     /**
      * Handle Razorpay Payment
@@ -201,7 +211,6 @@ class CheckoutController extends Controller
         try {
             Log::channel('daily')->info('Payment success request received:', $request->all());
             $validator = Validator::make($request->all(), [
-                'payment_id' => 'required',
                 'paymentReference' => 'required',
                 'status' => 'required',
             ]);
@@ -216,7 +225,7 @@ class CheckoutController extends Controller
 
         try {
 
-            $verified = $this->verifyTransaction($request->get('payment_id'));
+            $verified = $this->verifyTransaction($request->get('paymentReference'));
 
             if ($verified) {
                 $payment = Payment::with(['plan', 'subscription'])->where('reference_id', '=', $request->get('razorpay_order_id'))->first();
