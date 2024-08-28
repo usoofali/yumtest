@@ -23,9 +23,9 @@
                                     @foreach($paymentProcessors as $processor)
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center cursor-pointer">
-                                                <input x-model="payment" id="{{ $processor['code'] }}" name="payment_method" type="radio" value="{{ $processor['code'] }}" {{ $processor['default'] ? 'checked' : '' }} class="cursor-pointer focus:ring-current h-4 w-4 text-primary border-gray-300">
+                                                <input x-model="payment" id="{{ $processor['code'] }}" name="payment_method" type="radio" value="{{ $processor['code'] }}" {{ $processor['default'] ? 'checked' : 'checked' }} class="cursor-pointer focus:ring-current h-4 w-4 text-primary border-gray-300">
                                                 <label for="{{ $processor['code'] }}" class="ml-3 flex items-center block font-medium text-gray-700 cursor-pointer">
-                                                    <img class="h-8 rounded border border-gray-200" src="{{ url('/') }}/images/{{ $processor['code'] }}.svg" alt="{{ $processor['name'] }}">
+                                                    <img class="h-8 rounded border border-gray-200" src="{{ url('/') }}/images/{{ $processor['code'] }}.png" alt="{{ $processor['name'] }}">
                                                     <span class="ml-2 font-semibold">{{ $processor['name'] }}</span>
                                                 </label>
                                             </div>
