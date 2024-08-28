@@ -176,6 +176,7 @@ class CheckoutController extends Controller
     public function handleRazorpayPayment(Request $request, RazorpayRepository $repository)
     {
         Log::info('Payment success request received:', $request->all());
+        Log::channel('daily')->info("Payment with ID {$request->all()} has been cancelled and deleted.");
         $validator = Validator::make($request->all(), [
             'razorpay_signature' => 'required',
             'razorpay_payment_id' => 'required',
