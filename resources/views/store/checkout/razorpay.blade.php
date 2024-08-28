@@ -64,7 +64,14 @@
 
                     if (response.status === "SUCCESS") {
                         // Redirect to the Razorpay callback route
-                        window.location.href = "{{ route('razorpay_callback') }}";
+                        fetch("{{ route('razorpay_callback') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify(response)
+                        });
 
                     } else if (response.status === "FAILED") {
                         // Redirect to the payment cancelled route with payment_id parameter
@@ -79,7 +86,7 @@
                     if (response.paymentStatus === "USER_CANCELLED") {
                         // Redirect to the payment cancelled route with payment_id parameter
                         window.location.href = `{{ route('payment_cancelled') }}?payment_id={{ $payment_id }}`;
-                    } 
+                    }
                 }
             });
         });
