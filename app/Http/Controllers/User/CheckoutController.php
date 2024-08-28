@@ -198,41 +198,55 @@ class CheckoutController extends Controller
         return $vie;
     }
 
-    public function verifyTransaction($paymentReference)
+    public function verifyMonnify(Request $request)
     {
-        // Define the API endpoint with the query parameter for the payment reference
-        try {
-            $ref = urlencode($paymentReference);
-            Log::channel('daily')->info($paymentReference);
-            Log::channel('daily')->info($ref);
-            Log::channel('daily')->info($this->accessToken);
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://sandbox.monnify.com/api/v2/transactions/query' . $ref . '',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'GET'
-            ));
-            //Use bearer when dealing with oauth 2
-            $api_key = app(RazorpaySettings::class)->key_id;
-            $secret_key = app(RazorpaySettings::class)->key_secret;
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-                "Authorization: Bearer " . $this->accessToken
-            ));
+        $payload = $request->all();
 
-            $response = curl_exec($curl);
-            curl_close($curl);
-            $res = json_decode($response, true);
-            Log::channel('daily')->info('Payment success verification received:', $res);
-            return $res['responseBody'];
+        // Log the incoming payload for debugging (optional)
+        Log::channel('daily')->info('Monnify Webhook Notification:', $payload);
 
-        } catch (\Exception $e) {
-            Log::channel('daily')->info('Payment success verification received.');
+        $validator = Validator::make($request->all(), [
+            'paymentReference' => 'required|string',
+            'paymentStatus' => 'required|string',
+            'transactionReference' => 'required'
+        ]);
+
+        $payment_id = substr($request->get('paymentReference'), 0, 24);
+        $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
+
+        
+        //else update payment status and razorpay data
+        $payment->transaction_id = $request->get('transactionReference');
+        $payment->data->set([
+            'razorpay' => $validator->validated()
+        ]);
+        $payment->payment_date = Carbon::now()->toDateTimeString();
+        if($request->get('paymentStatus') === "PAID"){
+            $payment->status = 'success';
+        }else if($request->get('paymentStatus') === "PAID"){
+            $payment->status = 'success';
+        }else if($request->get('paymentStatus') === "PAID"){
+            $payment->status = 'success';
+        }else if($request->get('paymentStatus') === "PAID"){
+            $payment->status = 'success';
         }
+        
+        $payment->update();
+
+        // create if subscription not exists for the payment
+        if (!$payment->subscription) {
+            $subscription = $this->paymentRepository->createSubscription([
+                'payment_id' => $payment->id,
+                'plan_id' => $payment->plan_id,
+                'user_id' => $payment->user_id,
+                'category_type' => $payment->plan->category_type,
+                'category_id' => $payment->plan->category_id,
+                'duration' => $payment->plan->duration,
+                'status' => 'active'
+            ]);
+        }
+
+        return response()->json(['message' => 'Notification received and processed successfully.'], 200);
     }
     /**
      * Handle Razorpay Payment
@@ -244,7 +258,6 @@ class CheckoutController extends Controller
     public function handleRazorpayPayment(Request $request)
     {
         try {
-            Log::channel('daily')->info('Payment success request received:', $request->all());
             $validator = Validator::make($request->all(), [
                 'paymentReference' => 'required',
                 'status' => 'required',
@@ -252,48 +265,10 @@ class CheckoutController extends Controller
 
             if ($validator->fails()) {
                 return redirect()->route('payment_failed', );
-            }
-
-
-            $verified = $this->verifyTransaction($request->get('paymentReference'));
-
-            if ($verified) {
-
-                $payment = Payment::with(['plan', 'subscription'])->where('reference_id', '=', $request->get('razorpay_order_id'))->first();
-
-                // check if payment has been process previously
-                if ($payment->status == 'success' || $payment->status == 'failed' || $payment->status == 'cancelled') {
-                    return redirect()->back()->with('errorMessage', 'Payment already completed or cancelled.');
-                }
-
-                //else update payment status and razorpay data
-                $payment->transaction_id = $request->get('razorpay_payment_id');
-                $payment->data->set([
-                    'razorpay' => $validator->validated()
-                ]);
-                $payment->payment_date = Carbon::now()->toDateTimeString();
-                $payment->status = 'success';
-                $payment->update();
-
-                // create if subscription not exists for the payment
-                if (!$payment->subscription) {
-                    $subscription = $this->paymentRepository->createSubscription([
-                        'payment_id' => $payment->id,
-                        'plan_id' => $payment->plan_id,
-                        'user_id' => $payment->user_id,
-                        'category_type' => $payment->plan->category_type,
-                        'category_id' => $payment->plan->category_id,
-                        'duration' => $payment->plan->duration,
-                        'status' => 'active'
-                    ]);
-                }
-
-                return redirect()->route('payment_success');
             } else {
-                return redirect()->route('payment_failed');
+                return redirect()->route('payment_pending');
             }
         } catch (\Exception $e) {
-            Log::channel('daily')->error($e->getMessage());
             return redirect()->route('payment_failed');
         }
     }

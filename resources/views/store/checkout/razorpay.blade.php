@@ -39,7 +39,6 @@
     {{--This api can't be hosted on localhost--}}
     <script type="text/javascript" src="https://sdk.monnify.com/plugin/monnify.js"></script>
     <script>
-        console.log("{{ $billing_information['full_name'] }}");
         document.getElementById('rzp-button').addEventListener('click', function (event) {
             event.preventDefault();
             var ref = "{{ $payment_id }}" + Math.floor((Math.random() * 1000000000) + 1);
@@ -47,7 +46,7 @@
                 amount: "{{ $order_total }}",
                 currency: "{{ $order_currency }}",
                 reference: ref,
-                customerFullName: "{{ $billing_information['full_name'] }}",
+                customerName: "{{ $billing_information['full_name'] }}",
                 customerEmail: "{{ $billing_information['email'] }}",
                 customerPhone: "{{ $billing_information['phone'] }}",
                 apiKey: "{{ $razorpay_key }}",

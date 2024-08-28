@@ -56,6 +56,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/payment-failed', [CheckoutController::class, 'paymentFailed'])->name('payment_failed');
 
     Route::post('/callbacks/razorpay', [CheckoutController::class, 'handleRazorpayPayment'])->name('razorpay_callback');
+    Route::post('/verify/monnify', [CheckoutController::class, 'verifyMonnify'])
+    ->middleware('whitelist.ip')
+    ->name('verify_monnify');
+    
 
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('user_subscriptions');
     Route::post('/cancel-subscription/{id}', [SubscriptionController::class, 'cancelSubscription'])->name('cancel_my_subscription');
