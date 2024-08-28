@@ -28,7 +28,6 @@ class CheckoutController extends Controller
      * @var PaymentRepository
      */
     private PaymentRepository $paymentRepository;
-    private PaymentRepository $payment;
     /**
      * @var PaymentSettings
      */
