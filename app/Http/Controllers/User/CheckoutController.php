@@ -184,7 +184,7 @@ class CheckoutController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('payment_failed');
+            return redirect()->route('payment_failed',);
         }
         } catch (\Exception $e) {
             Log::channel('daily')->error($e->getMessage());
@@ -306,7 +306,7 @@ class CheckoutController extends Controller
     public function paymentFailed(Request $request)
     {
         // Retrieve the payment ID from the query parameters
-        $paymentId = $request->query('payment_id');
+        $paymentId = $request->get('payment_id');
     
         if ($paymentId) {
             // Find the payment record by payment ID

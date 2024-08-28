@@ -64,13 +64,17 @@
 
                     if (response.status === "SUCCESS") {
                         // Redirect to the Razorpay callback route
+                        const dataToSend = {
+                            ...response, // Spread the existing response object
+                            payment_id: "{{ $payment_id }}" // Add the payment_id
+                        };
                         fetch("{{ route('razorpay_callback') }}", {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
-                            body: JSON.stringify(response)
+                            body: JSON.stringify(dataToSend)
                         });
 
                     } else if (response.status === "FAILED") {
