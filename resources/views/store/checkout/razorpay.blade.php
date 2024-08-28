@@ -62,10 +62,13 @@
                 },
                 onComplete: (response) => {
                     console.log(response);
+                    
                 },
                 onClose: () => {
                     // Redirecting to the cancellation route with the payment ID
-                    console.log("SDK model closed.");
+                    console.log("SDK modal closed.");
+                    window.location.href = "{{ route('payment_cancelled') }}?payment_id={{ $payment_id }}";
+                    window.location.href = "{{ route('razorpay_callback') }}";
                 }
             });
         });
