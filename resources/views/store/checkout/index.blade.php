@@ -23,7 +23,7 @@
                                     @foreach($paymentProcessors as $processor)
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center cursor-pointer">
-                                                <input x-model="payment" id="{{ $processor['code'] }}" name="payment_method" type="radio" value="{{ $processor['code'] }}" {{ $processor['default'] ? 'checked' : 'checked' }} class="cursor-pointer focus:ring-current h-4 w-4 text-primary border-gray-300">
+                                                <input x-model="payment" id="{{ $processor['code'] }}" name="payment_method" type="radio" value="{{ $processor['code'] }}" {{ $processor['default'] ? 'checked' : '' }} class="cursor-pointer focus:ring-current h-4 w-4 text-primary border-gray-300">
                                                 <label for="{{ $processor['code'] }}" class="ml-3 flex items-center block font-medium text-gray-700 cursor-pointer">
                                                     <img class="h-8 rounded border border-gray-200" src="{{ url('/') }}/images/{{ $processor['code'] }}.png" alt="{{ $processor['name'] }}">
                                                     <span class="ml-2 font-semibold">{{ $processor['name'] }}</span>
@@ -135,7 +135,7 @@
                         <div class="p-4 lg:p-6">
                             @include('store.checkout.partials._order_summary')
                             <div class="mt-4">
-                                <!-- <template x-if="payment == 'bank'">
+                                <template x-if="payment == 'bank'">
                                     <div class="flex flex-col">
                                         @include('components.bank_details')
                                         <div class="mt-4">{{ __('When transferring the bank payment, please must include the following Payment ID in the reference field of the payment.') }}</div>
@@ -146,7 +146,7 @@
                                             {{ __('Submit Bank Payment') }}
                                         </button>
                                     </div>
-                                </template> -->
+                                </template>
                                 <template x-if="payment != 'bank'">
                                     <div class="flex flex-col mt-6">
                                         <div class="text-sm font-italic">{{ __('Note: You can review your order on the next page before making the payment.') }}</div>

@@ -38,8 +38,8 @@ return [
 
     'payment_processors' => [
         'razorpay' => [
-            'name' => 'Razorpay',
-            'description' => 'Credit/Debit Cards, Net Banking, UPI',
+            'name' => 'Monnify',
+            'description' => 'Cards, Transfer, USSD',
         ],
         'bank' => [
             'name' => 'Bank',

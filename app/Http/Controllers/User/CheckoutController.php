@@ -160,7 +160,6 @@ class CheckoutController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::channel('daily')->error($e->getMessage());
             return redirect()->route('payment_failed');
         }
        
