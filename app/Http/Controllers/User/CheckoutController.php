@@ -203,6 +203,8 @@ class CheckoutController extends Controller
         // Define the API endpoint with the query parameter for the payment reference
         try {
             $ref = urlencode($paymentReference);
+            Log::channel('daily')->info($paymentReference);
+            Log::channel('daily')->info($ref);
             $curl = curl_init();
             curl_setopt_array($curl, array(
                 CURLOPT_URL => 'https://sandbox.monnify.com/api/v2/transactions/' . $ref . '',
