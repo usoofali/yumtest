@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 class CheckoutController extends Controller
 {
@@ -33,7 +34,7 @@ class CheckoutController extends Controller
      */
     private PaymentSettings $paymentSettings;
 
-    
+
 
     public function __construct(CheckoutRepository $repository, PaymentRepository $paymentRepository, PaymentSettings $paymentSettings)
     {
@@ -57,7 +58,7 @@ class CheckoutController extends Controller
         return view('store.checkout.index', [
             'plan' => $plan->code,
             'billing_information' => $request->user()->preferences->get('billing_information', []),
-            'payment_id' => 'payment_'.Str::random(16),
+            'payment_id' => 'payment_' . Str::random(16),
             'order' => $this->repository->orderSummary($plan),
             'paymentProcessors' => $this->repository->getPaymentProcessors(),
             'countries' => isoCountries(),
@@ -74,7 +75,7 @@ class CheckoutController extends Controller
      */
     public function processCheckout(CheckoutProcessRequest $request, $plan)
     {
-        if(config('qwiktest.demo_mode')) {
+        if (config('qwiktest.demo_mode')) {
             return redirect()->back()->with('errorMessage', 'Demo Mode! These settings can\'t be changed.');
         }
 
@@ -87,12 +88,12 @@ class CheckoutController extends Controller
             ->where('status', '=', 'active')
             ->count();
 
-        if($activeSubscriptions > 0) {
-            return redirect()->back()->with('errorMessage', 'You already had an active subscription to '.$plan->category->name.'.');
+        if ($activeSubscriptions > 0) {
+            return redirect()->back()->with('errorMessage', 'You already had an active subscription to ' . $plan->category->name . '.');
         }
 
         // Check the user has pending bank payment
-        if($request->user()->hasPendingBankPayment($plan->id)) {
+        if ($request->user()->hasPendingBankPayment($plan->id)) {
             return redirect()->back()->with('errorMessage', __('A pending bank payment request already exists for this plan.'));
         }
 
@@ -113,9 +114,9 @@ class CheckoutController extends Controller
         ];
         $request->user()->update();
 
-        if($request->payment_method == 'bank') {
+        if ($request->payment_method == 'bank') {
             return $this->handleBankPayment($request->payment_id, $plan->id, $orderSummary);
-        } elseif($request->payment_method == 'razorpay') {
+        } elseif ($request->payment_method == 'razorpay') {
             return $this->initRazorpayPayment($request->payment_id, $plan->id, $orderSummary);
         } else {
             return redirect()->back();
@@ -132,7 +133,7 @@ class CheckoutController extends Controller
      */
     public function initRazorpayPayment($paymentId, $planId, $orderSummary)
     {
-    
+
         // Create payment record
         try {
             $payment = $this->paymentRepository->createPayment([
@@ -147,7 +148,7 @@ class CheckoutController extends Controller
                 'status' => 'pending',
                 'order_summary' => $orderSummary
             ]);
-            if(!$payment) {
+            if (!$payment) {
                 return redirect()->back()->with('successMessage', 'Something went wrong. Please try again.');
             }
             $vie = view('store.checkout.razorpay', [
@@ -162,10 +163,32 @@ class CheckoutController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('payment_failed');
         }
-       
+
         return $vie;
     }
 
+    public function verifyTransaction($paymentReference)
+    {
+        // Define the API endpoint with the query parameter for the payment reference
+        $headers = [
+            'Authorization' => 'Basic TUtfUFJPRF9XV0RYRktCN1paOkVUOVJMU1dESjNEN1FYRE44UUNSTVlSTlBCM1czRUFL',
+        ];
+
+        // Define the URL and parameters
+        $url = 'https://sandbox.monnify.com/api/v2/merchant/transactions/query';
+        $queryParams = [
+            'paymentReference' => $paymentReference,
+        ];
+
+        // Make the GET request
+        $response = Http::withHeaders($headers)->get($url, $queryParams);
+
+        // Get the response body
+        $responseBody = $response->body();
+        Log::channel('daily')->info('Payment success verification received:', ["rr"=>$responseBody]);
+        return $responseBody;
+
+    }
     /**
      * Handle Razorpay Payment
      *
@@ -175,17 +198,17 @@ class CheckoutController extends Controller
      */
     public function handleRazorpayPayment(Request $request)
     {
-        try{
-        Log::channel('daily')->info('Payment success request received:', $request->all());
-        $validator = Validator::make($request->all(), [
-            'razorpay_signature' => 'required',
-            'razorpay_payment_id' => 'required',
-            'razorpay_order_id' => 'required',
-        ]);
+        try {
+            Log::channel('daily')->info('Payment success request received:', $request->all());
+            $validator = Validator::make($request->all(), [
+                'payment_id' => 'required',
+                'paymentReference' => 'required',
+                'status' => 'required',
+            ]);
 
-        if ($validator->fails()) {
-            return redirect()->route('payment_failed',);
-        }
+            if ($validator->fails()) {
+                return redirect()->route('payment_failed', );
+            }
         } catch (\Exception $e) {
             Log::channel('daily')->error($e->getMessage());
             return redirect()->route('payment_failed');
@@ -193,13 +216,13 @@ class CheckoutController extends Controller
 
         try {
 
-            $verified = true;
-            
-            if($verified) {
+            $verified = $this->verifyTransaction($request->get('payment_id'));
+
+            if ($verified) {
                 $payment = Payment::with(['plan', 'subscription'])->where('reference_id', '=', $request->get('razorpay_order_id'))->first();
 
                 // check if payment has been process previously
-                if($payment->status == 'success' || $payment->status == 'failed'  || $payment->status == 'cancelled') {
+                if ($payment->status == 'success' || $payment->status == 'failed' || $payment->status == 'cancelled') {
                     return redirect()->back()->with('errorMessage', 'Payment already completed or cancelled.');
                 }
 
@@ -213,7 +236,7 @@ class CheckoutController extends Controller
                 $payment->update();
 
                 // create if subscription not exists for the payment
-                if(!$payment->subscription) {
+                if (!$payment->subscription) {
                     $subscription = $this->paymentRepository->createSubscription([
                         'payment_id' => $payment->id,
                         'plan_id' => $payment->plan_id,
@@ -258,7 +281,7 @@ class CheckoutController extends Controller
                 'status' => 'pending',
                 'order_summary' => $orderSummary
             ]);
-            if(!$payment) {
+            if (!$payment) {
                 return redirect()->route('payment_failed');
             }
         } catch (\Exception $e) {
@@ -282,11 +305,11 @@ class CheckoutController extends Controller
     {
         // Retrieve the payment ID from the query parameters
         $paymentId = $request->query('payment_id');
-    
+
         if ($paymentId) {
             // Find the payment record by payment ID
             $payment = Payment::where('payment_id', $paymentId)->first();
-    
+
             if ($payment) {
                 // Delete the payment record
                 $payment->delete();
@@ -297,21 +320,21 @@ class CheckoutController extends Controller
         } else {
             Log::channel('daily')->warning("No payment ID provided for cancellation.");
         }
-    
+
         // Return the cancellation view to the user
         return view('store.checkout.payment_cancelled');
     }
-    
+
 
     public function paymentFailed(Request $request)
     {
         // Retrieve the payment ID from the query parameters
         $paymentId = $request->get('payment_id');
-    
+
         if ($paymentId) {
             // Find the payment record by payment ID
             $payment = Payment::where('payment_id', $paymentId)->first();
-    
+
             if ($payment) {
                 // Delete the payment record
                 $payment->delete();

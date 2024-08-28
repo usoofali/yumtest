@@ -48,18 +48,6 @@ class RazorpayRepository
                 ]);
     }
 
-    public function verifyTransaction($paymentReference)
-    {
-        // Define the API endpoint with the query parameter for the payment reference
-        $url = 'https://sandbox.monnify.com/api/v2/merchant/transactions/query?paymentReference=' . urlencode($paymentReference);
-
-        // Make a GET request to the Monnify API with Basic Authentication
-        $response = Http::withBasicAuth($this->settings->key_id, $this->settings->key_secret)
-            ->get($url);
-
-        // Return the response (or you can handle it as needed)
-        return $response;
-    }
 
     /**
      * Verify Razorpay payment with signature
