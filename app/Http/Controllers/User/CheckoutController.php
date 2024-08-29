@@ -230,13 +230,15 @@ class CheckoutController extends Controller
                 'paymentReference' => 'required',
                 'status' => 'required',
             ]);
+            Log::channel('daily')->info('PayRef: '.$request->get('paymentReference'));
             $response = $this->verifyTransaction($request->get('paymentReference'));
             Log::channel('daily')->info('Monnify Webhook Notification:1');
-            Log::channel('daily')->info($response);
+            Log::channel('daily')->info('Response',$response);
             
             $payment_id = substr($request->get('paymentReference'), 0, 24);
             Log::channel('daily')->info('Monnify Webhook Notification :'.$payment_id);
             $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
+
             Log::channel('daily')->info($payment->status);
             // check if payment has been process previously
             if ($payment->status == 'success' || $payment->status == 'failed' || $payment->status == 'cancelled') {
@@ -352,9 +354,9 @@ class CheckoutController extends Controller
 
         try {
             $response = $this->monnifyService->initTransaction($data);
-            return response()->json($response);
+            return $response;
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return ['error' => $e->getMessage()];
         }
     }
 
@@ -362,9 +364,9 @@ class CheckoutController extends Controller
     {
         try {
             $response = $this->monnifyService->verifyTransaction($transactionRef);
-            return response()->json($response);
+            return $response;
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return ['error' => $e->getMessage()];
         }
     }
 }

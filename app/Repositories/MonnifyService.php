@@ -5,7 +5,7 @@ namespace App\Repositories;
 
 use Illuminate\Support\Facades\Http;
 use App\Settings\RazorpaySettings;
-use Exception;
+use Illuminate\Support\Facades\Log;
 
 class MonnifyService
 {
@@ -31,11 +31,13 @@ class MonnifyService
 
             if ($response->successful()) {
                 $this->accessToken = $response['responseBody']['accessToken'];
+                Log::channel('daily')->info('Access Token: '.$this->accessToken);
+
             } else {
-                throw new Exception('Failed to retrieve access token: ' . $response->body());
+                Log::channel('daily')->info('Error: Failed to get access token.');
             }
-        } catch (Exception $e) {
-            throw new Exception("Error initializing authentication: " . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::channel('daily')->info('Error: '.$e->getMessage());
         }
     }
 
@@ -50,10 +52,10 @@ class MonnifyService
             if ($response->successful()) {
                 return $response['responseBody'];
             } else {
-                throw new Exception('Failed to initialize transaction: ' . $response->body());
+                Log::channel('daily')->info('Failed to initialize transaction: ' . $response->body());
             }
-        } catch (Exception $e) {
-            throw new Exception("Error initializing transaction: " . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::channel('daily')->info('Error: '.$e->getMessage());
         }
     }
 
@@ -67,10 +69,10 @@ class MonnifyService
             if ($response->successful()) {
                 return $response['responseBody'];
             } else {
-                throw new Exception('Failed to verify transaction: ' . $response->body());
+                Log::channel('daily')->info('Error: Failed to get access token.');
             }
-        } catch (Exception $e) {
-            throw new Exception("Error verifying transaction: " . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::channel('daily')->info('Error: '.$e->getMessage());
         }
     }
 }
