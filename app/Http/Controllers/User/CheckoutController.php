@@ -194,7 +194,7 @@ class CheckoutController extends Controller
 
         $calculatedHash = hash_hmac('sha512', '{$validatedPayload}', app(RazorpaySettings::class)->secret_key);
 
-        if( $calculatedHash !== $transHash) {
+        if ($calculatedHash !== $transHash) {
             return response()->json(['success' => false], 400);
         }
 
@@ -217,7 +217,7 @@ class CheckoutController extends Controller
         // }
 
         return response()->json(['success' => true], 200);
-        
+
     }
     /**
      * Handle Razorpay Payment
@@ -239,6 +239,10 @@ class CheckoutController extends Controller
 
             if ($response) {
                 Log::channel('daily')->info($response);
+                $variableType = gettype($response);
+
+                // Log the variable type
+                Log::info('The type of the variable is: ' . $variableType);
 
                 $payment_id = substr($request->get('paymentReference'), 0, 24);
                 $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
@@ -248,7 +252,7 @@ class CheckoutController extends Controller
                 ]);
                 $payment->payment_date = Carbon::now()->toDateTimeString();
 
-                if( $response->get('paymentStatus') === "PAID") {
+                if ($response->get('paymentStatus') === "PAID") {
                     $payment->status = 'success';
                 } else {
                     $payment->status = 'pending';
@@ -307,7 +311,6 @@ class CheckoutController extends Controller
 
     public function paymentPending()
     {
-        Log::channel('daily')->info('Control hit pending payment view.');
         return view('store.checkout.payment_pending');
     }
 
