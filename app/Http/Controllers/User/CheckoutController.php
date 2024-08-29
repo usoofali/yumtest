@@ -232,24 +232,20 @@ class CheckoutController extends Controller
             ]);
             Log::channel('daily')->info('PayRef: '.$request->get('paymentReference'));
             $response = $this->verifyTransaction($request->get('paymentReference'));
-            Log::channel('daily')->info('Monnify Webhook Notification:1');
             Log::channel('daily')->info($response);
             
             $payment_id = substr($request->get('paymentReference'), 0, 24);
             Log::channel('daily')->info('Monnify Webhook Notification :'.$payment_id);
             $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
 
-            Log::channel('daily')->info($payment->status);
             // check if payment has been process previously
             if ($payment->status == 'success' || $payment->status == 'failed' || $payment->status == 'cancelled') {
                 return redirect()->back()->with('errorMessage', 'Payment already completed or cancelled.');
             }
-            Log::channel('daily')->info('Monnify Webhook Notification:2');
             if ($validator->fails()) {
-                Log::channel('daily')->info('Monnify Webhook Notification:3');
                 return redirect()->route('payment_failed', );
             } else {
-                Log::channel('daily')->info('Monnify Webhook Notification:4');
+                Log::channel('daily')->info('Control hit pending route.');
                 return redirect()->route('payment_pending');
             }
         } catch (\Exception $e) {
@@ -298,6 +294,7 @@ class CheckoutController extends Controller
 
     public function paymentPending()
     {
+        Log::channel('daily')->info('Control hit pending payment view:3');
         return view('store.checkout.payment_pending');
     }
 
