@@ -31,7 +31,6 @@ class MonnifyService
 
             if ($response->successful()) {
                 $this->accessToken = $response['responseBody']['accessToken'];
-                Log::channel('daily')->info('Access Token: '.$this->accessToken);
 
             } else {
                 Log::channel('daily')->info('Error: Failed to get access token.');
@@ -47,7 +46,7 @@ class MonnifyService
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
                 'Content-Type' => 'application/json',
-            ])->post(config('monnify.base_url') . '/merchant/transactions/init-transaction', $data);
+            ])->post(config('monnify.base_url'.'api/v1') . '/merchant/transactions/init-transaction', $data);
 
             if ($response->successful()) {
                 return $response['responseBody'];
@@ -62,14 +61,16 @@ class MonnifyService
     public function verifyTransaction($transactionRef)
     {
         try {
+            Log::channel('daily')->info('Access Token: '.$this->accessToken);
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
-            ])->get(config('monnify.base_url') . "/transactions/{$transactionRef}");
+            ])->get(config('monnify.base_url'.'api/v2') . "/transactions/{$transactionRef}");
 
             if ($response->successful()) {
+                Log::channel('daily')->info('Success: good response.');
                 return $response['responseBody'];
             } else {
-                Log::channel('daily')->info('Error: Failed to get access token.');
+                Log::channel('daily')->info('Error: No good response.');
                 return $response->body();
             }
         } catch (\Exception $e) {
