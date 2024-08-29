@@ -41,19 +41,40 @@ class MonnifyService
     }
 
     public function verifyTransaction($transactionRef)
-    {
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => "Bearer {$this->accessToken}",
-            ])->get("https://sandbox.monnify.com/api/v2/transactions/{$transactionRef}");
-            
-            if ($response->successful()) {
-                return $response['responseBody'];
-            } else {
-                return false;
-            }
-        } catch (\Exception $e) {
-            Log::channel('daily')->info('Error: '.$e->getMessage());
+{
+    try {
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer {$this->accessToken}",
+        ])->get("https://sandbox.monnify.com/api/v2/transactions/{$transactionRef}");
+
+        // Log the raw response for debugging
+        Log::channel('daily')->info("Raw response received.", [
+            'transactionRef' => $transactionRef,
+            'status' => $response->status(),
+            'response' => $response->body() // Logs the raw response body
+        ]);
+
+        if ($response->successful()) {
+            Log::channel('daily')->info("Transaction verified successfully.", [
+                'transactionRef' => $transactionRef,
+                'response' => $response->json() // Log the decoded JSON response
+            ]);
+            return $response->json(); // Decode the JSON response and return it
+        } else {
+            Log::channel('daily')->warning("Transaction verification failed.", [
+                'transactionRef' => $transactionRef,
+                'status' => $response->status(),
+                'response' => $response->body() // Log the raw response body
+            ]);
+            return false; // Indicate failure
         }
+    } catch (\Exception $e) {
+        Log::channel('daily')->error('Error during transaction verification.', [
+            'exception' => $e->getMessage(),
+            'transactionRef' => $transactionRef
+        ]);
+        return false; // Indicate failure
     }
+}
+
 }
