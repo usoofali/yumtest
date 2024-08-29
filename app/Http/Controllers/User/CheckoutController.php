@@ -248,7 +248,7 @@ class CheckoutController extends Controller
                 ]);
                 $payment->payment_date = Carbon::now()->toDateTimeString();
                 Log::channel('daily')->info($response);
-                if ($response["paymentStatus"] === "PAID") {
+                if ($response['responseBody']['paymentStatus'] == "PAID") {
                     $payment->status = 'success';
                 } else {
                     $payment->status = 'pending';
