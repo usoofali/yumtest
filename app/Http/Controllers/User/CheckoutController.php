@@ -225,6 +225,7 @@ class CheckoutController extends Controller
      */
     public function handleRazorpayPayment(Request $request)
     {
+        Log::channel('daily')->info('PayLoad: ', $request->all());
         try {
             $validator = Validator::make($request->all(), [
                 'paymentReference' => 'required',
