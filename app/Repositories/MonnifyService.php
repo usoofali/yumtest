@@ -63,7 +63,7 @@ class MonnifyService
         try {
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
-            ])->get(config('monnify.base_url'). 'api/v2' . "/transactions/{$transactionRef}");
+            ])->get(config('monnify.base_url'). "/api/v2/transactions/{$transactionRef}");
 
             if ($response->successful()) {
                 Log::channel('daily')->info('Success: good response.');

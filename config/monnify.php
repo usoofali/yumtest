@@ -2,5 +2,5 @@
 // config/monnify.php
 
 return [
-    'base_url' => env('MONNIFY_BASE_URL', 'https://sandbox.monnify.com/'),
+    'base_url' => env('MONNIFY_BASE_URL', 'https://sandbox.monnify.com'),
 ];
