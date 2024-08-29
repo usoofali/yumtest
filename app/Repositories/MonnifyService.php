@@ -46,6 +46,11 @@ class MonnifyService
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
             ])->get("https://sandbox.monnify.com/api/v2/transactions/{$transactionRef}");
+            
+            $type = gettype($response);
+
+            Log::info('The type of the variable is: '. $type);
+            Log::info($response);
 
             if ($response->successful()) {
                 return $response['responseBody'];

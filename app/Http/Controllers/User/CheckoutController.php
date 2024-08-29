@@ -238,12 +238,6 @@ class CheckoutController extends Controller
             $response = $this->verifyTransaction($paymentId);
 
             if ($response) {
-                Log::channel('daily')->info($response);
-                $variableType = gettype($response);
-
-                // Log the variable type
-                Log::info('The type of the variable is: ' . $variableType);
-
                 $payment_id = substr($request->get('paymentReference'), 0, 24);
                 $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
                 $payment->transaction_id = $request->get('transactionReference');
