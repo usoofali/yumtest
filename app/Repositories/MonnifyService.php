@@ -70,6 +70,7 @@ class MonnifyService
                 return $response['responseBody'];
             } else {
                 Log::channel('daily')->info('Error: Failed to get access token.');
+                return $response->body();
             }
         } catch (\Exception $e) {
             Log::channel('daily')->info('Error: '.$e->getMessage());
