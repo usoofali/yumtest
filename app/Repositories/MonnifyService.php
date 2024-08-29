@@ -46,7 +46,7 @@ class MonnifyService
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
                 'Content-Type' => 'application/json',
-            ])->post(config('monnify.base_url'). 'api/v1' . '/merchant/transactions/init-transaction', $data);
+            ])->post('https://sandbox.monnify.com/api/v1/merchant/transactions/init-transaction', $data);
 
             if ($response->successful()) {
                 return $response['responseBody'];
@@ -65,7 +65,7 @@ class MonnifyService
         try {
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
-            ])->get(config('monnify.base_url'). "/api/v2/transactions/{$transactionRef}");
+            ])->get("https://sandbox.monnify.com/api/v2/transactions/{$transactionRef}");
 
             if ($response->successful()) {
                 Log::channel('daily')->info('Success: good response.');
