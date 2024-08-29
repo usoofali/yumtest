@@ -237,6 +237,7 @@ class CheckoutController extends Controller
 
             Log::channel('daily')->info($paymentId);
             $response = $this->verifyTransaction($paymentId);
+            Log::channel('daily')->info($response);
 
             if ($response) {
                 $payment_id = substr($request->get('paymentReference'), 0, 24);
