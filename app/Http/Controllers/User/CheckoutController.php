@@ -235,6 +235,7 @@ class CheckoutController extends Controller
             ]);
             $paymentId = $request->query('payment_id');
 
+            Log::channel('daily')->info($paymentId);
             $response = $this->verifyTransaction($paymentId);
 
             if ($response) {
