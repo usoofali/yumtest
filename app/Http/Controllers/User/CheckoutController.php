@@ -260,7 +260,9 @@ class CheckoutController extends Controller
             } else {
                 return redirect()->route('payment_pending');
             }
+
         } catch (\Exception $e) {
+            Log::channel('daily')->error($e->getMessage());
             return redirect()->route('payment_pending');
         }
     }
