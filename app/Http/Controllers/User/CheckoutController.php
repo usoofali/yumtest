@@ -228,14 +228,14 @@ class CheckoutController extends Controller
      */
     public function handleRazorpayPayment(Request $request)
     {
-        Log::channel('daily')->info('PayLoad: ', $request->all());
         try {
             $validator = Validator::make($request->all(), [
                 'paymentReference' => 'required',
                 'status' => 'required',
             ]);
-            Log::channel('daily')->info('PayRef: ' . $request->get('paymentReference'));
-            $response = $this->verifyTransaction($request->get('transactionReference'));
+            $paymentId = $request->query('payment_id');
+
+            $response = $this->verifyTransaction($paymentId);
 
             if ($response) {
                 Log::channel('daily')->info($response);
@@ -255,7 +255,6 @@ class CheckoutController extends Controller
                 }
 
                 $payment->update();
-
 
                 return redirect()->route('payment_success');
             } else {
@@ -355,18 +354,6 @@ class CheckoutController extends Controller
             Log::channel('daily')->warning("No payment ID provided for cancellation.");
         }
         return view('store.checkout.payment_failed');
-    }
-
-    public function initializeTransaction(Request $request)
-    {
-        $data = $request->all();
-
-        try {
-            $response = $this->monnifyService->initTransaction($data);
-            return response()->json($response);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
     }
 
     public function verifyTransaction($transactionRef)

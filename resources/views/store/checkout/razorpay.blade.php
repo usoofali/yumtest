@@ -62,14 +62,7 @@
                 onComplete: (response) => {
 
                     if (response.status === "SUCCESS") {
-                        fetch("{{ route('razorpay_callback') }}", {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify(response)
-                        });
+                        window.location.href = `{{ route('razorpay_callback') }}?payment_id=` + response.transactionReference;
 
                     } else if (response.status === "FAILED") {
                         // Redirect to the payment cancelled route with payment_id parameter

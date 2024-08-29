@@ -40,24 +40,6 @@ class MonnifyService
         }
     }
 
-    public function initTransaction(array $data)
-    {
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => "Bearer {$this->accessToken}",
-                'Content-Type' => 'application/json',
-            ])->post('https://sandbox.monnify.com/api/v1/merchant/transactions/init-transaction', $data);
-
-            if ($response->successful()) {
-                return $response['responseBody'];
-            } else {
-                Log::channel('daily')->info('Failed to initialize transaction: ' . $response->body());
-            }
-        } catch (\Exception $e) {
-            Log::channel('daily')->info('Error: '.$e->getMessage());
-        }
-    }
-
     public function verifyTransaction($transactionRef)
     {
         try {
