@@ -9,6 +9,7 @@ use App\Models\Plan;
 use App\Repositories\CheckoutRepository;
 use App\Repositories\PaymentRepository;
 use App\Repositories\RazorpayRepository;
+use App\Repositories\MonnifyService;
 use App\Settings\BankSettings;
 use App\Settings\PaymentSettings;
 use App\Settings\RazorpaySettings;
@@ -34,44 +35,15 @@ class CheckoutController extends Controller
      */
     private PaymentSettings $paymentSettings;
     protected $accessToken;
+    protected $monnifyService;
 
-
-
-    public function __construct(CheckoutRepository $repository, PaymentRepository $paymentRepository, PaymentSettings $paymentSettings)
+    public function __construct(CheckoutRepository $repository, PaymentRepository $paymentRepository, PaymentSettings $paymentSettings, MonnifyService $monnifyService)
     {
         $this->middleware(['role:guest|student|employee']);
         $this->repository = $repository;
         $this->paymentRepository = $paymentRepository;
         $this->paymentSettings = $paymentSettings;
-        try {
-            $api_key = app(RazorpaySettings::class)->key_id;
-            $secret_key = app(RazorpaySettings::class)->key_secret;
-            $auth = base64_encode($api_key . ":" . $secret_key);
-
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://sandbox.monnify.com/api/v1/auth/login/',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-
-            ));
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-
-                "Authorization: Basic $auth"
-
-            ));
-            $response = json_decode(curl_exec($curl), true);
-            curl_close($curl);
-            //Assign accessToken to var
-            $this->accessToken = $response['responseBody']['accessToken'];
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
-        }
+        $this->monnifyService = $monnifyService;
 
     }
 
@@ -198,11 +170,12 @@ class CheckoutController extends Controller
         return $vie;
     }
 
-    public function verifyMonnify(Request $request)
+    public function verifyMonnifyHook(Request $request)
     {
         $payload = $request->all();
 
         // Log the incoming payload for debugging (optional)
+        Log::channel('daily')->info('Monnify Webhook Notification 1:');
         Log::channel('daily')->info('Monnify Webhook Notification:', $payload);
 
         $validator = Validator::make($request->all(), [
@@ -257,11 +230,14 @@ class CheckoutController extends Controller
                 'paymentReference' => 'required',
                 'status' => 'required',
             ]);
+            $response = $this->verifyTransaction($request->get('paymentReference'));
             Log::channel('daily')->info('Monnify Webhook Notification:1');
+            Log::channel('daily')->info($response);
+            
             $payment_id = substr($request->get('paymentReference'), 0, 24);
             Log::channel('daily')->info('Monnify Webhook Notification :'.$payment_id);
             $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
-    
+            Log::channel('daily')->info($payment->status);
             // check if payment has been process previously
             if ($payment->status == 'success' || $payment->status == 'failed' || $payment->status == 'cancelled') {
                 return redirect()->back()->with('errorMessage', 'Payment already completed or cancelled.');
@@ -368,5 +344,27 @@ class CheckoutController extends Controller
             Log::channel('daily')->warning("No payment ID provided for cancellation.");
         }
         return view('store.checkout.payment_failed');
+    }
+
+    public function initializeTransaction(Request $request)
+    {
+        $data = $request->all();
+
+        try {
+            $response = $this->monnifyService->initTransaction($data);
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function verifyTransaction($transactionRef)
+    {
+        try {
+            $response = $this->monnifyService->verifyTransaction($transactionRef);
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
