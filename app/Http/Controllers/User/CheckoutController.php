@@ -233,7 +233,7 @@ class CheckoutController extends Controller
             Log::channel('daily')->info('PayRef: '.$request->get('paymentReference'));
             $response = $this->verifyTransaction($request->get('paymentReference'));
             Log::channel('daily')->info('Monnify Webhook Notification:1');
-            Log::channel('daily')->info('Response',$response);
+            Log::channel('daily')->info('Response',json_decode($response));
             
             $payment_id = substr($request->get('paymentReference'), 0, 24);
             Log::channel('daily')->info('Monnify Webhook Notification :'.$payment_id);
@@ -354,9 +354,9 @@ class CheckoutController extends Controller
 
         try {
             $response = $this->monnifyService->initTransaction($data);
-            return $response;
+            return response()->json($response);
         } catch (\Exception $e) {
-            return ['error' => $e->getMessage()];
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -364,9 +364,9 @@ class CheckoutController extends Controller
     {
         try {
             $response = $this->monnifyService->verifyTransaction($transactionRef);
-            return $response;
+            return response()->json($response);
         } catch (\Exception $e) {
-            return ['error' => $e->getMessage()];
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }
