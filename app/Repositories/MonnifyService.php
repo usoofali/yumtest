@@ -1,7 +1,7 @@
 <?php
 // app/Services/MonnifyService.php
 
-namespace App\Services;
+namespace App\Repositories;
 
 use Illuminate\Support\Facades\Http;
 use App\Settings\RazorpaySettings;
