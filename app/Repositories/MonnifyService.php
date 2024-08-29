@@ -60,19 +60,15 @@ class MonnifyService
 
     public function verifyTransaction($transactionRef)
     {
-        Log::channel('daily')->info('Verify path of call.');
-        Log::channel('daily')->info(config('monnify.base_url'). "/api/v2/transactions/{$transactionRef}");
         try {
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
             ])->get("https://sandbox.monnify.com/api/v2/transactions/{$transactionRef}");
 
             if ($response->successful()) {
-                Log::channel('daily')->info('Success: good response.');
                 return $response['responseBody'];
             } else {
-                Log::channel('daily')->info('Error: No good response.');
-                return $response->body();
+                return false;
             }
         } catch (\Exception $e) {
             Log::channel('daily')->info('Error: '.$e->getMessage());

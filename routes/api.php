@@ -8,7 +8,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\User\CheckoutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +23,4 @@ use App\Http\Controllers\User\CheckoutController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::post('/verify/monnify', [CheckoutController::class, 'verifyMonnifyHook'])
-    ->middleware('whitelist.ip')
-    ->name('verify_monnify');
+

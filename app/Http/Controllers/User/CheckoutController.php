@@ -172,49 +172,52 @@ class CheckoutController extends Controller
 
     public function verifyMonnifyHook(Request $request)
     {
-        $payload = $request->all();
 
-        // Log the incoming payload for debugging (optional)
-        Log::channel('daily')->info('Monnify Webhook Notification 1:');
-        Log::channel('daily')->info('Monnify Webhook Notification:', $payload);
-
-        $validator = Validator::make($request->all(), [
-            'paymentReference' => 'required|string',
-            'paymentStatus' => 'required|string',
-            'transactionReference' => 'required'
+        $payload = $request->get('payload');
+        Log::channel('daily')->info('Control hit pending payment view.', $payload);
+        // Verify signature
+        $validatedPayload = $request->validate([
+            'transactionReference' => 'required',
+            'paymentReference' => 'required',
+            'amountPaid' => 'required',
+            'totalPayable' => 'required',
+            'paidOn' => 'required',
+            'paymentStatus' => 'required',
+            'paymentDescription' => 'required',
+            'transactionHash' => 'required',
+            'currency' => 'required',
+            'paymentMethod' => 'required',
         ]);
 
-        $payment_id = substr($request->get('paymentReference'), 0, 24);
-        $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
+        $transHash = $validatedPayload['transactionHash'];
+        $signature = $request->header('monnify-signature');
 
+        $calculatedHash = hash_hmac('sha512', '{$validatedPayload}', app(RazorpaySettings::class)->secret_key);
+
+        if( $calculatedHash !== $transHash) {
+            return response()->json(['success' => false], 400);
+        }
+
+        // // If payment captured payment status as success
+        // if($request->get('event') == 'payment.captured') {
+        //     $payment = Payment::where('transaction_id', '=', $payload['payment']['entity']['id'])->first();
+        //     if($payment) {
+        //         $payment->status = 'success';
+        //         $payment->update;
+        //     }
+        // }
+
+        // // If payment failed mark payment status as failed
+        // if($request->get('event') == 'payment.failed') {
+        //     $payment = Payment::where('transaction_id', '=', $payload['payment']['entity']['id'])->first();
+        //     if($payment) {
+        //         $payment->status = 'failed';
+        //         $payment->update;
+        //     }
+        // }
+
+        return response()->json(['success' => true], 200);
         
-        //else update payment status and razorpay data
-        $payment->transaction_id = $request->get('transactionReference');
-        $payment->data->set([
-            'razorpay' => $validator->validated()
-        ]);
-        $payment->payment_date = Carbon::now()->toDateTimeString();
-        if($request->get('paymentStatus') === "PAID"){
-            $payment->status = 'success';
-        }else {
-            $payment->status = 'pending';
-        }
-        $payment->update();
-
-        // create if subscription not exists for the payment
-        if (!$payment->subscription) {
-            $subscription = $this->paymentRepository->createSubscription([
-                'payment_id' => $payment->id,
-                'plan_id' => $payment->plan_id,
-                'user_id' => $payment->user_id,
-                'category_type' => $payment->plan->category_type,
-                'category_id' => $payment->plan->category_id,
-                'duration' => $payment->plan->duration,
-                'status' => 'active'
-            ]);
-        }
-
-        return response()->json(['message' => 'Notification received and processed successfully.'], 200);
     }
     /**
      * Handle Razorpay Payment
@@ -231,27 +234,35 @@ class CheckoutController extends Controller
                 'paymentReference' => 'required',
                 'status' => 'required',
             ]);
-            Log::channel('daily')->info('PayRef: '.$request->get('paymentReference'));
+            Log::channel('daily')->info('PayRef: ' . $request->get('paymentReference'));
             $response = $this->verifyTransaction($request->get('transactionReference'));
-            Log::channel('daily')->info($response);
-            
-            $payment_id = substr($request->get('paymentReference'), 0, 24);
-            Log::channel('daily')->info('Monnify Webhook Notification :'.$payment_id);
-            $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
 
-            // check if payment has been process previously
-            if ($payment->status == 'success' || $payment->status == 'failed' || $payment->status == 'cancelled') {
-                return redirect()->back()->with('errorMessage', 'Payment already completed or cancelled.');
-            }
-            if ($validator->fails()) {
-                return redirect()->route('payment_failed', );
+            if ($response) {
+                Log::channel('daily')->info($response);
+
+                $payment_id = substr($request->get('paymentReference'), 0, 24);
+                $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
+                $payment->transaction_id = $request->get('transactionReference');
+                $payment->data->set([
+                    'razorpay' => $validator->validated()
+                ]);
+                $payment->payment_date = Carbon::now()->toDateTimeString();
+
+                if( $response->get('paymentStatus') === "PAID") {
+                    $payment->status = 'success';
+                } else {
+                    $payment->status = 'pending';
+                }
+
+                $payment->update();
+
+
+                return redirect()->route('payment_success');
             } else {
-                Log::channel('daily')->info('Control hit pending route.');
                 return redirect()->route('payment_pending');
             }
         } catch (\Exception $e) {
-            Log::channel('daily')->info('Monnify Webhook Notification:5');
-            return redirect()->route('payment_failed');
+            return redirect()->route('payment_pending');
         }
     }
 

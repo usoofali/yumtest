@@ -46,7 +46,7 @@
                 amount: "{{ $order_total }}",
                 currency: "{{ $order_currency }}",
                 reference: ref,
-                customerName: "{{ $billing_information['full_name'] }}",
+                customerFullName: "{{ $billing_information['full_name'] }}",
                 customerEmail: "{{ $billing_information['email'] }}",
                 customerPhone: "{{ $billing_information['phone'] }}",
                 apiKey: "{{ $razorpay_key }}",
