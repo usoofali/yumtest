@@ -236,7 +236,7 @@ class CheckoutController extends Controller
             $paymentId = $request->query('payment_id');
 
             Log::channel('daily')->info($paymentId);
-            $response = json_decode($this->verifyTransaction($paymentId));
+            $response = $this->monnifyService->verifyTransaction($paymentId);
             Log::channel('daily')->info($response);
 
             if ($response) {
@@ -355,15 +355,5 @@ class CheckoutController extends Controller
             Log::channel('daily')->warning("No payment ID provided for cancellation.");
         }
         return view('store.checkout.payment_failed');
-    }
-
-    public function verifyTransaction($transactionRef)
-    {
-        try {
-            $response = $this->monnifyService->verifyTransaction($transactionRef);
-            return response()->json($response);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
     }
 }
