@@ -245,8 +245,8 @@ class CheckoutController extends Controller
                     'razorpay' => $validator->validated()
                 ]);
                 $payment->payment_date = Carbon::now()->toDateTimeString();
-
-                if ($response->get('paymentStatus') === "PAID") {
+                Log::channel('daily')->info($response);
+                if ($response["paymentStatus"] === "PAID") {
                     $payment->status = 'success';
                 } else {
                     $payment->status = 'pending';
