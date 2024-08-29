@@ -60,6 +60,8 @@ class MonnifyService
 
     public function verifyTransaction($transactionRef)
     {
+        Log::channel('daily')->info('Verify path of call.');
+        Log::channel('daily')->info(config('monnify.base_url'). "/api/v2/transactions/{$transactionRef}");
         try {
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
