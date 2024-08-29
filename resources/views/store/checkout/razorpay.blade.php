@@ -62,7 +62,7 @@
                 onComplete: (response) => {
 
                     if (response.status === "SUCCESS") {
-                        window.location.href = `{{ route('razorpay_callback') }}?payment_id=` + response.transactionReference;
+                        window.location.href = "{{ route('razorpay_callback') }}?paymentReference="+ response.paymentReference +"&transactionReference=" + response.transactionReference;
 
                     } else if (response.status === "FAILED") {
                         // Redirect to the payment cancelled route with payment_id parameter

@@ -229,23 +229,16 @@ class CheckoutController extends Controller
     public function handleRazorpayPayment(Request $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'paymentReference' => 'required',
-                'status' => 'required',
-            ]);
-            $paymentId = $request->query('payment_id');
+            $transactionReference = $request->query('transactionReference');
+            $paymentReference = $request->query('paymentReference');
 
-            Log::channel('daily')->info($paymentId);
-            $response = $this->monnifyService->verifyTransaction($paymentId);
+            $response = $this->monnifyService->verifyTransaction($transactionReference);
             Log::channel('daily')->info($response);
 
             if ($response) {
-                $payment_id = substr($request->get('paymentReference'), 0, 24);
+                $payment_id = substr($paymentReference, 0, 24);
                 $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
                 $payment->transaction_id = $request->get('transactionReference');
-                $payment->data->set([
-                    'razorpay' => $validator->validated()
-                ]);
                 $payment->payment_date = Carbon::now()->toDateTimeString();
                 Log::channel('daily')->info($response);
                 if ($response['responseBody']['paymentStatus'] == "PAID") {
