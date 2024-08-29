@@ -232,7 +232,7 @@ class CheckoutController extends Controller
                 'status' => 'required',
             ]);
             Log::channel('daily')->info('PayRef: '.$request->get('paymentReference'));
-            $response = $this->verifyTransaction($request->get('paymentReference'));
+            $response = $this->verifyTransaction($request->get('transactionReference'));
             Log::channel('daily')->info($response);
             
             $payment_id = substr($request->get('paymentReference'), 0, 24);
@@ -295,7 +295,7 @@ class CheckoutController extends Controller
 
     public function paymentPending()
     {
-        Log::channel('daily')->info('Control hit pending payment view:3');
+        Log::channel('daily')->info('Control hit pending payment view.');
         return view('store.checkout.payment_pending');
     }
 
