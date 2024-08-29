@@ -233,7 +233,7 @@ class CheckoutController extends Controller
             Log::channel('daily')->info('PayRef: '.$request->get('paymentReference'));
             $response = $this->verifyTransaction($request->get('paymentReference'));
             Log::channel('daily')->info('Monnify Webhook Notification:1');
-            Log::channel('daily')->info('Response',json_decode($response));
+            Log::channel('daily')->info($response);
             
             $payment_id = substr($request->get('paymentReference'), 0, 24);
             Log::channel('daily')->info('Monnify Webhook Notification :'.$payment_id);
