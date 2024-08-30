@@ -198,24 +198,6 @@ class CheckoutController extends Controller
             return response()->json(['success' => false], 400);
         }
 
-        // // If payment captured payment status as success
-        // if($request->get('event') == 'payment.captured') {
-        //     $payment = Payment::where('transaction_id', '=', $payload['payment']['entity']['id'])->first();
-        //     if($payment) {
-        //         $payment->status = 'success';
-        //         $payment->update;
-        //     }
-        // }
-
-        // // If payment failed mark payment status as failed
-        // if($request->get('event') == 'payment.failed') {
-        //     $payment = Payment::where('transaction_id', '=', $payload['payment']['entity']['id'])->first();
-        //     if($payment) {
-        //         $payment->status = 'failed';
-        //         $payment->update;
-        //     }
-        // }
-
         return response()->json(['success' => true], 200);
 
     }
@@ -237,13 +219,27 @@ class CheckoutController extends Controller
 
             if ($response) {
                 $payment_id = substr($paymentReference, 0, 24);
+
                 $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
+
                 $payment->transaction_id = $request->get('transactionReference');
                 $payment->payment_date = Carbon::now()->toDateTimeString();
-                Log::channel('daily')->info($response);
+
                 if ($response['responseBody']['paymentStatus'] == "PAID") {
+
                     $payment->status = 'success';
+                    $subscription = $this->paymentRepository->createSubscription([
+                        'payment_id' => $payment->id,
+                        'plan_id' => $payment->plan_id,
+                        'user_id' => $payment->user_id,
+                        'category_type' => $payment->plan->category_type,
+                        'category_id' => $payment->plan->category_id,
+                        'duration' => $payment->plan->duration,
+                        'status' => 'active'
+                    ]);
+
                 } else {
+
                     $payment->status = 'pending';
                 }
 

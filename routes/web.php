@@ -41,7 +41,6 @@ Route::get('run-migrations', [AppInstallController::class, 'runMigrations'])->na
 |--------------------------------------------------------------------------
 */
 Route::post('webhooks/razorpay', [WebHookController::class, 'razorpay'])->name('webhooks.razorpay');
-Route::post('/verify/monnify', [CheckoutController::class, 'verifyMonnifyHook'])
-    ->middleware('whitelist.ip')
-    ->name('verify_monnify');
+
+Route::post('/verify/monnify', [CheckoutController::class, 'verifyMonnifyHook'])->name('verify_monnify');
 
