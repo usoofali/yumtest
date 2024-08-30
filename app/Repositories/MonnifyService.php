@@ -45,7 +45,7 @@ class MonnifyService
     try {
         $response = Http::withHeaders([
             'Authorization' => "Bearer {$this->accessToken}",
-        ])->get("https://sandbox.monnify.com/api/v2/transactions/{$transactionRef}");
+        ])->get("https://api.monnify.com/api/v2/transactions/{$transactionRef}");
 
         if ($response->successful()) {
             Log::channel('daily')->info("Transaction verified successfully.", [

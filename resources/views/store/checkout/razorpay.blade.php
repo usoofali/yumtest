@@ -50,7 +50,7 @@
                 customerEmail: "{{ $billing_information['email'] }}",
                 customerPhone: "{{ $billing_information['phone'] }}",
                 apiKey: "{{ $razorpay_key }}",
-                contractCode: "4294676748",
+                contractCode: "841717941012",
                 paymentDescription: "YUMTest Payment",
                 isTestMode: true,
                 onLoadStart: () => {
