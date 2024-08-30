@@ -119,7 +119,7 @@
                                     <div>
                                         <label for="zip" class="block font-medium text-gray-700">{{ __('Postal code') }}</label>
                                         <div class="mt-1">
-                                            <input type="hidden" value="80008000" name="zip" id="zip" value="{{ old('zip') ?? ($billing_information['zip'] ?? null) }}" autocomplete="zip" class="block w-full rounded-sm shadow-sm focus:ring-current focus:border-primary {{ $errors->has('zip') ? ' border-red-300' : 'border-gray-300' }}">
+                                            <input type="text" value="80008000" name="zip" id="zip" value="{{ old('zip') ?? ($billing_information['zip'] ?? null) }}" autocomplete="zip" class="block w-full rounded-sm shadow-sm focus:ring-current focus:border-primary {{ $errors->has('zip') ? ' border-red-300' : 'border-gray-300' }}">
                                         </div>
                                         @if ($errors->has('zip'))
                                             <div class="text-xs mt-1 text-red-500" role="alert"><span>{{ $errors->first('zip') }}</span></div>

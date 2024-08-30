@@ -213,19 +213,23 @@ class CheckoutController extends Controller
         try {
             $transactionReference = $request->query('transactionReference');
             $paymentReference = $request->query('paymentReference');
-
             $response = $this->monnifyService->verifyTransaction($transactionReference);
-            Log::channel('daily')->info($response);
 
             if ($response) {
                 $payment_id = substr($paymentReference, 0, 24);
+                Log::channel('daily')->info($payment_id);
 
                 $payment = Payment::with(['plan', 'subscription'])->where('payment_id', '=', $payment_id)->first();
+                Log::channel('daily')->info($payment);
+                
+                if($payment->status == 'success' || $payment->status == 'failed'  || $payment->status == 'cancelled') {
+                    return redirect()->back()->with('errorMessage', 'Payment already completed or cancelled.');
+                }
 
                 $payment->transaction_id = $request->get('transactionReference');
                 $payment->payment_date = Carbon::now()->toDateTimeString();
 
-                if ($response['responseBody']['paymentStatus'] == "PAID") {
+                if($response['responseBody']['paymentStatus'] == "PAID") {
 
                     $payment->status = 'success';
                     $subscription = $this->paymentRepository->createSubscription([
