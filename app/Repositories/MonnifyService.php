@@ -47,13 +47,6 @@ class MonnifyService
             'Authorization' => "Bearer {$this->accessToken}",
         ])->get("https://sandbox.monnify.com/api/v2/transactions/{$transactionRef}");
 
-        // Log the raw response for debugging
-        Log::channel('daily')->info("Raw response received.", [
-            'transactionRef' => $transactionRef,
-            'status' => $response->status(),
-            'response' => $response->body() // Logs the raw response body
-        ]);
-
         if ($response->successful()) {
             Log::channel('daily')->info("Transaction verified successfully.", [
                 'transactionRef' => $transactionRef,
