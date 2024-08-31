@@ -154,7 +154,7 @@ class CheckoutController extends Controller
             if (!$payment) {
                 return redirect()->back()->with('successMessage', 'Something went wrong. Please try again.');
             }
-            $vie = view('store.checkout.razorpay', [
+            return view('store.checkout.razorpay', [
                 'order_currency' => "NGN",
                 'order_total' => $orderSummary['total'],
                 'razorpay_key' => app(RazorpaySettings::class)->key_id,
@@ -166,8 +166,6 @@ class CheckoutController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('payment_failed');
         }
-
-        return $vie;
     }
 
     public function verifyMonnifyHook(Request $request)

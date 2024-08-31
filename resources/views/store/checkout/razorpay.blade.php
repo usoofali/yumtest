@@ -46,7 +46,7 @@
                 amount: "{{ $order_total }}",
                 currency: "{{ $order_currency }}",
                 reference: ref,
-                customerFullName: "{{ $billing_information['full_name'] }}",
+                customerName: "{{ $billing_information['full_name'] }}",
                 customerEmail: "{{ $billing_information['email'] }}",
                 customerPhone: "{{ $billing_information['phone'] }}",
                 apiKey: "{{ $razorpay_key }}",
@@ -57,6 +57,9 @@
                     console.log("loading has started");
                 },
                 onLoadComplete: () => {
+                    console.log("SDK is UP");
+                    console.log("SDK is UP "+ "{{ $billing_information['full_name'] }}");
+                    console.log("SDK is UP");
                     console.log("SDK is UP");
                 },
                 onComplete: (response) => {
