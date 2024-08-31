@@ -58,9 +58,6 @@
                 },
                 onLoadComplete: () => {
                     console.log("SDK is UP");
-                    console.log("SDK is UP "+ "{{ $billing_information['full_name'] }}");
-                    console.log("SDK is UP" + "{{ $razorpay_key }}");
-                    console.log("SDK is UP");
                 },
                 onComplete: (response) => {
 
