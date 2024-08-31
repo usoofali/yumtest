@@ -52,7 +52,7 @@
                 apiKey: "{{ $razorpay_key }}",
                 contractCode: "841717941012",
                 paymentDescription: "YUMTest Payment",
-                isTestMode: true,
+                isTestMode: false,
                 onLoadStart: () => {
                     console.log("loading has started");
                 },
