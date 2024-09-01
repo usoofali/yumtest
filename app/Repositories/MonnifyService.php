@@ -48,7 +48,7 @@ class MonnifyService
         }
     }
 
-    public function initializeTransaction($amount, $customerName, $customerEmail, $paymentReference, $paymentDescription, $currencyCode, $contractCode, $redirectUrl, $paymentMethods, $incomeSplitConfig = null, $metadata = null)
+    public function initializeTransaction($amount, $customerName, $customerEmail, $paymentReference, $paymentDescription, $currencyCode, $contractCode, $redirectUrl)
     {
         try {
             $response = Http::withHeaders([
@@ -62,10 +62,7 @@ class MonnifyService
                         'paymentDescription' => $paymentDescription,
                         'currencyCode' => $currencyCode,
                         'contractCode' => $contractCode,
-                        'redirectUrl' => $redirectUrl,
-                        'paymentMethods' => $paymentMethods,
-                        'incomeSplitConfig' => $incomeSplitConfig,
-                        'metadata' => $metadata
+                        'redirectUrl' => $redirectUrl
                     ]);
 
             if ($response->successful()) {

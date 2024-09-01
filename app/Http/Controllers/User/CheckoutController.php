@@ -154,14 +154,38 @@ class CheckoutController extends Controller
             if (!$payment) {
                 return redirect()->back()->with('successMessage', 'Something went wrong. Please try again.');
             }
-            return view('store.checkout.razorpay', [
-                'order_currency' => "NGN",
-                'order_total' => $orderSummary['total'],
-                'razorpay_key' => app(RazorpaySettings::class)->key_id,
-                'billing_information' => request()->user()->preferences->get('billing_information', []),
-                'order' => $orderSummary,
-                'payment_id' => $paymentId,
-            ]);
+            $billing_info = request()->user()->preferences->get('billing_information', []);
+            $response = $this->monnifyService->initializeTransaction(
+                $orderSummary['total'],
+                $billing_info['full_name'],
+                $billing_info['email'],
+                $paymentId,
+                "YUM Test payment",
+                "NGN",
+                app(RazorpaySettings::class)->webhook_secret,
+                "https://www.yumtest.online/callbacks/monnify"
+            );
+            if ($response->successful()) {
+                Log::info("Transaction initialized successfully.", [
+                    'status' => $response->status(),
+                    'response' => $response->json()
+                ]);
+            } else {
+                Log::warning("Transaction initialization failed.", [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+            }
+
+            return redirect()->route('payment_success');
+            // return view('store.checkout.razorpay', [
+            //     'order_currency' => "NGN",
+            //     'order_total' => $orderSummary['total'],
+            //     'razorpay_key' => app(RazorpaySettings::class)->key_id,
+            //     'billing_information' => request()->user()->preferences->get('billing_information', []),
+            //     'order' => $orderSummary,
+            //     'payment_id' => $paymentId,
+            // ]);
 
         } catch (\Exception $e) {
             return redirect()->route('payment_failed');
