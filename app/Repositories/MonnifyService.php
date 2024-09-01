@@ -31,12 +31,12 @@ class MonnifyService
 
             if ($response->successful()) {
                 $this->accessToken = $response['responseBody']['accessToken'];
-                Log::info('Successfully retrieved access token.', [
+                Log::channel('daily')->info('Successfully retrieved access token.', [
                     'status' => $response->status(),
                     'response' => $response->json(),
                 ]);
             } else {
-                Log::error('Failed to retrieve access token.', [
+                Log::channel('daily')->error('Failed to retrieve access token.', [
                     'status' => $response->status(),
                     'response' => $response->body(),
                     'error' => $response->json('responseMessage', 'Unknown error'),
