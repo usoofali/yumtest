@@ -75,7 +75,7 @@ class MonnifyService
                 Log::warning("Transaction initialization failed.", [
                     'paymentReference' => $paymentReference,
                     'status' => $response->status(),
-                    'response' => $response->body()
+                    'response' => $response->json()
                 ]);
                 return false;
             }

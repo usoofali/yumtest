@@ -165,17 +165,10 @@ class CheckoutController extends Controller
                 app(RazorpaySettings::class)->webhook_secret,
                 "https://www.yumtest.online/callbacks/monnify"
             );
-            if ($response->successful()) {
                 Log::info("Transaction initialized successfully.", [
                     'status' => $response->status(),
-                    'response' => $response->json()
+                    'response' => $response
                 ]);
-            } else {
-                Log::warning("Transaction initialization failed.", [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-            }
 
             return redirect()->route('payment_success');
             // return view('store.checkout.razorpay', [
