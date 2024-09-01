@@ -31,10 +31,6 @@ class MonnifyService
 
             if ($response->successful()) {
                 $this->accessToken = $response['responseBody']['accessToken'];
-                Log::channel('daily')->info('Successfully retrieved access token.', [
-                    'status' => $response->status(),
-                    'response' => $response->json(),
-                ]);
             } else {
                 Log::channel('daily')->error('Failed to retrieve access token.', [
                     'status' => $response->status(),
@@ -53,6 +49,15 @@ class MonnifyService
         try {
             $api_key = app(RazorpaySettings::class)->key_id;
             $secret_key = app(RazorpaySettings::class)->key_secret;
+            $webhook_secret = app(RazorpaySettings::class)->webhook_secret;
+
+            Log::channel('daily')->info('Monnify Credentials:', [
+                'api_key' => $api_key,
+                'secret_key' => $secret_key,
+                'webhook_secret' => $webhook_secret,
+                'accessToken' => $this->accessToken
+            ]);
+            
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
                 'Content-Type' => 'application/json'
@@ -63,18 +68,18 @@ class MonnifyService
                         'paymentReference' => $paymentReference,
                         'paymentDescription' => $paymentDescription,
                         'currencyCode' => $currencyCode,
-                        'contractCode' => $contractCode,
+                        'contractCode' => $webhook_secret,
                         'redirectUrl' => $redirectUrl
                     ]);
 
             if ($response->successful()) {
-                Log::info("Transaction initialized successfully.", [
+                Log::channel('daily')->info("Transaction initialized successfully.", [
                     'paymentReference' => $paymentReference,
                     'response' => $response->json()
                 ]);
                 return $response->json();
             } else {
-                Log::warning("Transaction initialization failed.", [
+                Log::channel('daily')->info("Transaction initialization failed.", [
                     'paymentReference' => $paymentReference,
                     'status' => $response->status(),
                     'response' => $response->json()
