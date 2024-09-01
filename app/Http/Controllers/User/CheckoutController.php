@@ -166,7 +166,6 @@ class CheckoutController extends Controller
                 "https://www.yumtest.online/callbacks/monnify"
             );
                 Log::info("Transaction initialized successfully.", [
-                    'status' => $response->status(),
                     'response' => $response
                 ]);
 
