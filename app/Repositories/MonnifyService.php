@@ -51,10 +51,12 @@ class MonnifyService
     public function initializeTransaction($amount, $customerName, $customerEmail, $paymentReference, $paymentDescription, $currencyCode, $contractCode, $redirectUrl)
     {
         try {
+            $api_key = app(RazorpaySettings::class)->key_id;
+            $secret_key = app(RazorpaySettings::class)->key_secret;
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
                 'Content-Type' => 'application/json'
-            ])->post(config('monnify.base_url') . '/merchant/transactions/init-transaction', [
+            ])->withBasicAuth($api_key, $secret_key)->asJson()->post(config('monnify.base_url') . '/merchant/transactions/init-transaction', [
                         'amount' => $amount,
                         'customerName' => $customerName,
                         'customerEmail' => $customerEmail,
