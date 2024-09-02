@@ -138,7 +138,7 @@
                                 <template x-if="payment == 'bank'">
                                     <div class="flex flex-col">
                                         @include('components.bank_details')
-                                        <div class="mt-4">{{ __('When transferring the bank payment, please must include the following Payment ID in the reference field of the payment or Call Admin at 0816778410.') }}</div>
+                                        <div class="mt-4">{{ __('After successful payment copy and send the Payment ID below to 0816778410 via sms.') }}</div>
                                         <div class="mt-2 px-4 py-2 rounded-md bg-blue-50 border border-blue-200">
                                             {{ $payment_id }}
                                         </div>
