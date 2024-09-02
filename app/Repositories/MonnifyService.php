@@ -75,7 +75,17 @@ class MonnifyService
             if ($response->successful()) {
                 Log::channel('daily')->info("Transaction initialized successfully.", [
                     'paymentReference' => $paymentReference,
-                    'response' => $response->json()
+                    'response' => $response->json(),
+                    'payload' => [
+                        'amount' => $amount,
+                        'customerName' => $customerName,
+                        'customerEmail' => $customerEmail,
+                        'paymentReference' => $paymentReference,
+                        'paymentDescription' => $paymentDescription,
+                        'currencyCode' => $currencyCode,
+                        'contractCode' => $webhook_secret,
+                        'redirectUrl' => $redirectUrl
+                    ]
                 ]);
                 return $response->json();
             } else {
@@ -89,7 +99,17 @@ class MonnifyService
         } catch (\Exception $e) {
             Log::error('Error during transaction initialization.', [
                 'exception' => $e->getMessage(),
-                'paymentReference' => $paymentReference
+                'paymentReference' => $paymentReference,
+                'payload' => [
+                        'amount' => $amount,
+                        'customerName' => $customerName,
+                        'customerEmail' => $customerEmail,
+                        'paymentReference' => $paymentReference,
+                        'paymentDescription' => $paymentDescription,
+                        'currencyCode' => $currencyCode,
+                        'contractCode' => $webhook_secret,
+                        'redirectUrl' => $redirectUrl
+                    ]
             ]);
             return false;
         }
