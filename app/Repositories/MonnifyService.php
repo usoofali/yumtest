@@ -92,7 +92,17 @@ class MonnifyService
                 Log::channel('daily')->info("Transaction initialization failed.", [
                     'paymentReference' => $paymentReference,
                     'status' => $response->status(),
-                    'response' => $response->json()
+                    'response' => $response->json(),
+                    'payload' => [
+                        'amount' => $amount,
+                        'customerName' => $customerName,
+                        'customerEmail' => $customerEmail,
+                        'paymentReference' => $paymentReference,
+                        'paymentDescription' => $paymentDescription,
+                        'currencyCode' => $currencyCode,
+                        'contractCode' => $webhook_secret,
+                        'redirectUrl' => $redirectUrl
+                    ]
                 ]);
                 return false;
             }
