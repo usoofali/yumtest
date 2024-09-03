@@ -169,7 +169,7 @@ class CheckoutController extends Controller
                     'response' => $response
                 ]);
 
-            return redirect()->route('payment_success');
+            return redirect()->route('payment_failed');
             // return view('store.checkout.razorpay', [
             //     'order_currency' => "NGN",
             //     'order_total' => $orderSummary['total'],
