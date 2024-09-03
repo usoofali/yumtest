@@ -11,10 +11,17 @@ class MonnifyService
 {
     protected $authHeader;
     protected $accessToken;
+    protected $v1;
+    protected $v2;
+
 
     public function __construct()
     {
         $this->initializeAuth();
+        $v1 = 'https://api.monnify.com/api/v1';
+        $v2 = 'https://api.monnify.com/api/v2';
+        $v1s = 'https://api.monnify.com/api/v1';
+        $v2s = 'https://api.monnify.com/api/v2';
     }
 
     private function initializeAuth()
@@ -27,7 +34,7 @@ class MonnifyService
 
             $response = Http::withHeaders([
                 'Authorization' => "Basic {$this->authHeader}",
-            ])->post(config('monnify.base_url') . '/auth/login/');
+            ])->post($this->v1  . '/auth/login/');
 
             if ($response->successful()) {
                 $this->accessToken = $response['responseBody']['accessToken'];
@@ -61,7 +68,7 @@ class MonnifyService
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
                 'Content-Type' => 'application/json'
-            ])->withBasicAuth($api_key, $secret_key)->asJson()->post(config('monnify.base_url') . '/merchant/transactions/init-transaction', [
+            ])->withBasicAuth($api_key, $secret_key)->asJson()->post($this->v1 . '/merchant/transactions/init-transaction', [
                         'amount' => $amount,
                         'customerName' => $customerName,
                         'customerEmail' => $customerEmail,
