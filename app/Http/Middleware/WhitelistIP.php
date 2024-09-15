@@ -16,11 +16,8 @@ class WhitelistIP
      */
     public function handle(Request $request, Closure $next)
     {
-        $whitelistedIP = '35.242.133.146'; // The IP address to whitelist
 
-        if ($request->ip() !== $whitelistedIP) {
-            // Optionally, you can log unauthorized access attempts
-            // \Log::warning('Unauthorized access attempt from IP: ' . $request->ip());
+        if ($request->ip() !== '35.242.133.146') {
             
             return response()->json(['error' => 'Unauthorized'], 403);
         }

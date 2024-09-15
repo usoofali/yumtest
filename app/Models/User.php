@@ -12,7 +12,7 @@ use App\Traits\SecureDeletes;
 use App\Traits\SubscriptionTrait;
 use Bavix\Wallet\Interfaces\Wallet;
 use Bavix\Wallet\Traits\HasWallet;
-//use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -25,7 +25,7 @@ use App\Filters\QueryFilter;
 use Spatie\SchemalessAttributes\SchemalessAttributesTrait;
 use Illuminate\Database\Eloquent\Builder;
 
-class User extends Authenticatable implements Wallet
+class User extends Authenticatable implements Wallet, MustVerifyEmail
 {
     use HasApiTokens;
     use HasFactory;

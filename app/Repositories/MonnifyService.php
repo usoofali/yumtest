@@ -18,10 +18,17 @@ class MonnifyService
     public function __construct()
     {
         $this->initializeAuth();
-        $v1 = 'https://api.monnify.com/api/v1';
-        $v2 = 'https://api.monnify.com/api/v2';
-        $v1s = 'https://api.monnify.com/api/v1';
-        $v2s = 'https://api.monnify.com/api/v2';
+        $mode = "demo";
+        if($mode == "live"){
+            $this->v1 = 'https://api.monnify.com/api/v1';
+            $this->v2 = 'https://api.monnify.com/api/v2';
+        }
+        else{
+            $this->v1 = 'https://api.monnify.com/api/v1';
+            $this->v2 = 'https://api.monnify.com/api/v2';
+        }
+        
+       
     }
 
     private function initializeAuth()
@@ -80,26 +87,13 @@ class MonnifyService
                     ]);
 
             if ($response->successful()) {
-                Log::channel('daily')->info("Transaction initialized successfully.", [
-                    'paymentReference' => $paymentReference,
-                    'response' => $response->json(),
-                    'payload' => [
-                        'amount' => $amount,
-                        'customerName' => $customerName,
-                        'customerEmail' => $customerEmail,
-                        'paymentReference' => $paymentReference,
-                        'paymentDescription' => $paymentDescription,
-                        'currencyCode' => $currencyCode,
-                        'contractCode' => $webhook_secret,
-                        'redirectUrl' => $redirectUrl
-                    ]
-                ]);
                 return $response->json();
             } else {
-                Log::channel('daily')->info("Transaction initialization failed.", [
+                
+                return [
                     'paymentReference' => $paymentReference,
-                    'status' => $response->status(),
-                    'response' => $response->json(),
+                    'status' => false,
+                    'response' => "Transaction initialization failed.",
                     'payload' => [
                         'amount' => $amount,
                         'customerName' => $customerName,
@@ -110,25 +104,24 @@ class MonnifyService
                         'contractCode' => $webhook_secret,
                         'redirectUrl' => $redirectUrl
                     ]
-                ]);
-                return false;
+                ];
             }
         } catch (\Exception $e) {
-            Log::error('Error during transaction initialization.', [
-                'exception' => $e->getMessage(),
+            return [
                 'paymentReference' => $paymentReference,
+                'status' => false,
+                'response' => "Error during transaction initialization.",
                 'payload' => [
-                        'amount' => $amount,
-                        'customerName' => $customerName,
-                        'customerEmail' => $customerEmail,
-                        'paymentReference' => $paymentReference,
-                        'paymentDescription' => $paymentDescription,
-                        'currencyCode' => $currencyCode,
-                        'contractCode' => $webhook_secret,
-                        'redirectUrl' => $redirectUrl
-                    ]
-            ]);
-            return false;
+                    'amount' => $amount,
+                    'customerName' => $customerName,
+                    'customerEmail' => $customerEmail,
+                    'paymentReference' => $paymentReference,
+                    'paymentDescription' => $paymentDescription,
+                    'currencyCode' => $currencyCode,
+                    'contractCode' => $webhook_secret,
+                    'redirectUrl' => $redirectUrl
+                ]
+            ];
         }
     }
 
@@ -137,7 +130,7 @@ class MonnifyService
         try {
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$this->accessToken}",
-            ])->get("https://api.monnify.com/api/v2/transactions/{$transactionRef}");
+            ])->get($this->v2 . "/transactions/{$transactionRef}");
 
             if ($response->successful()) {
                 Log::channel('daily')->info("Transaction verified successfully.", [
